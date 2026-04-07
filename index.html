@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bowflex PR3000 Training Plan</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232735;
+    --accent: #6c5ce7;
+    --accent-glow: rgba(108,92,231,.25);
+    --green: #00b894;
+    --orange: #fdcb6e;
+    --red: #e17055;
+    --blue: #74b9ff;
+    --text: #dfe6e9;
+    --text-dim: #8395a7;
+    --border: #2d3142;
+    --card-hover: #282c3a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #1a1d27 0%, #2d1b69 100%);
+    padding: 1.5rem 1.5rem 1.25rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: .2rem;
+    background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header .subtitle { color: var(--text-dim); font-size: .85rem; }
+
+  /* ── WEEK TRACKER ── */
+  .week-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+  }
+  .week-bar-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .week-label-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .week-heading {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 2px;
+  }
+  .week-display {
+    display: flex;
+    align-items: baseline;
+    gap: .4rem;
+  }
+  .week-num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+  .week-of { font-size: .8rem; color: var(--text-dim); }
+  .week-phase-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .25rem .65rem;
+    border-radius: 20px;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    margin-top: 4px;
+    width: fit-content;
+  }
+  .phase-foundation { background: rgba(116,185,255,.12); color: var(--blue); border: 1px solid rgba(116,185,255,.25); }
+  .phase-build      { background: rgba(253,203,110,.12); color: var(--orange); border: 1px solid rgba(253,203,110,.25); }
+  .phase-push       { background: rgba(225,112,85,.12); color: var(--red); border: 1px solid rgba(225,112,85,.25); }
+  .phase-deload     { background: rgba(0,184,148,.12); color: var(--green); border: 1px solid rgba(0,184,148,.25); }
+
+  /* Progress dots */
+  .week-progress {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .week-dot {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .week-dot.done { background: #4a3fa0; border-color: #6c5ce7; }
+  .week-dot.current { background: var(--accent); border-color: #a29bfe; box-shadow: 0 0 6px var(--accent-glow); }
+  .week-dot.deload { background: rgba(0,184,148,.4); border-color: var(--green); }
+  .week-dot:hover { transform: scale(1.3); }
+
+  /* Controls */
+  .week-controls {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-left: auto;
+  }
+  .week-btn {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+  }
+  .week-btn:hover { border-color: var(--accent); background: rgba(108,92,231,.15); }
+  .week-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  .reset-btn {
+    font-size: .72rem;
+    padding: .3rem .65rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s;
+  }
+  .reset-btn:hover { border-color: var(--accent); color: var(--text); }
+
+  /* ── EFFORT BANNER ── */
+  .effort-banner {
+    max-width: 800px;
+    margin: 0 auto 1.25rem;
+    border-radius: 12px;
+    padding: .9rem 1.1rem;
+    border-left: 3px solid;
+    display: flex;
+    gap: .75rem;
+    align-items: flex-start;
+  }
+  .effort-banner .effort-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+  .effort-banner .effort-body {}
+  .effort-banner .effort-title { font-weight: 700; font-size: .9rem; margin-bottom: .15rem; }
+  .effort-banner .effort-desc { font-size: .82rem; color: var(--text-dim); line-height: 1.5; }
+
+  .effort-foundation { background: rgba(116,185,255,.07); border-color: var(--blue); }
+  .effort-foundation .effort-title { color: var(--blue); }
+  .effort-build { background: rgba(253,203,110,.07); border-color: var(--orange); }
+  .effort-build .effort-title { color: var(--orange); }
+  .effort-push { background: rgba(225,112,85,.07); border-color: var(--red); }
+  .effort-push .effort-title { color: var(--red); }
+  .effort-deload { background: rgba(0,184,148,.07); border-color: var(--green); }
+  .effort-deload .effort-title { color: var(--green); }
+
+  /* ── DAY NAV ── */
+  .day-nav {
+    display: flex;
+    gap: .5rem;
+    padding: .85rem 1.5rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .day-btn {
+    flex-shrink: 0;
+    padding: .55rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 76px;
+  }
+  .day-btn .day-label { font-size: .72rem; opacity: .7; margin-bottom: 1px; }
+  .day-btn .day-focus { font-size: .68rem; opacity: .6; margin-top: 2px; }
+  .day-btn:hover { background: var(--card-hover); border-color: var(--accent); color: var(--text); }
+  .day-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 4px 15px var(--accent-glow); }
+  .day-btn.active .day-label, .day-btn.active .day-focus { opacity: 1; }
+  .day-btn.today-marker { border-color: var(--green); }
+  .day-btn.today-marker::after {
+    content: '';
+    display: block;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-top: 3px;
+  }
+
+  /* ── CONTENT ── */
+  .content { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+  .day-header { margin-bottom: 1.25rem; }
+  .day-header h2 { font-size: 1.25rem; margin-bottom: .3rem; }
+  .day-header p { color: var(--text-dim); font-size: .88rem; line-height: 1.55; }
+
+  .workout-note {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    padding: .7rem 1rem;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 1.25rem;
+    font-size: .83rem;
+    color: var(--text-dim);
+  }
+
+  /* ── EXERCISE CARDS ── */
+  .exercise-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: .85rem;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .exercise-card:hover { border-color: #3d4260; }
+  .exercise-top {
+    padding: .9rem 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: .9rem;
+  }
+  .exercise-num {
+    flex-shrink: 0;
+    width: 30px; height: 30px;
+    border-radius: 7px;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: .82rem;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+  .exercise-info { flex: 1; min-width: 0; }
+  .exercise-name { font-weight: 600; font-size: .97rem; margin-bottom: .25rem; }
+  .exercise-meta { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+  .meta-tag {
+    font-size: .72rem;
+    padding: .18rem .5rem;
+    border-radius: 5px;
+    font-weight: 700;
+  }
+  .tag-sets { background: rgba(108,92,231,.15); color: #a29bfe; }
+  .tag-reps { background: rgba(0,184,148,.15); color: #55efc4; }
+  .tag-effort {
+    font-size: .68rem;
+    padding: .15rem .45rem;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  .tag-moderate { background: rgba(116,185,255,.12); color: var(--blue); }
+  .tag-heavy    { background: rgba(225,112,85,.12); color: var(--red); }
+  .tag-speed    { background: rgba(253,203,110,.12); color: var(--orange); }
+  .tag-light    { background: rgba(0,184,148,.12); color: var(--green); }
+
+  .expand-arrow { flex-shrink:0; color:var(--text-dim); font-size:1.1rem; transition:transform .2s; margin-top:7px; }
+  .exercise-card.open .expand-arrow { transform: rotate(180deg); }
+
+  .exercise-detail { display:none; padding: 0 1.1rem .9rem 3.4rem; }
+  .exercise-card.open .exercise-detail { display: block; }
+  .exercise-detail p { color:var(--text-dim); font-size:.85rem; line-height:1.6; margin-bottom:.7rem; }
+
+  .exrx-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: .8rem;
+    font-weight: 600;
+    padding: .3rem .65rem;
+    border-radius: 6px;
+    background: rgba(108,92,231,.1);
+    transition: background .2s;
+  }
+  .exrx-link:hover { background: rgba(108,92,231,.2); }
+  .exrx-link svg { width: 13px; height: 13px; }
+
+  /* ── REST DAY ── */
+  .rest-day { text-align:center; padding: 3.5rem 2rem; }
+  .rest-icon { font-size: 2.8rem; margin-bottom: .8rem; opacity: .6; }
+  .rest-day h2 { color: var(--green); margin-bottom: .4rem; }
+  .rest-day p { color: var(--text-dim); font-size: .9rem; max-width: 380px; margin: 0 auto; }
+  .rest-suggestions { margin-top:1.25rem; display:flex; gap:.6rem; justify-content:center; flex-wrap:wrap; }
+  .rest-chip { padding:.35rem .8rem; background:var(--surface2); border:1px solid var(--border); border-radius:20px; font-size:.78rem; color:var(--text-dim); }
+
+  .info-section { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.1rem; margin-top:1.25rem; }
+  .info-section h3 { font-size:.9rem; color:var(--accent); margin-bottom:.4rem; }
+  .info-section p { color:var(--text-dim); font-size:.83rem; line-height:1.55; }
+
+  /* Week picker modal */
+  .week-picker-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .week-picker-overlay.open { display: flex; }
+  .week-picker-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    width: min(360px, 90vw);
+  }
+  .week-picker-modal h3 { margin-bottom: 1rem; font-size: 1rem; }
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: .5rem;
+    margin-bottom: 1rem;
+  }
+  .week-pick-btn {
+    padding: .55rem .25rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: .8rem;
+    font-weight: 600;
+    transition: all .15s;
+    text-align: center;
+  }
+  .week-pick-btn:hover { border-color: var(--accent); color: var(--text); }
+  .week-pick-btn.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .week-pick-btn .pick-phase { font-size: .6rem; opacity: .75; display: block; margin-top: 1px; }
+  .modal-actions { display: flex; gap: .5rem; justify-content: flex-end; }
+  .modal-btn {
+    padding: .4rem .85rem;
+    border-radius: 7px;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    transition: all .15s;
+  }
+  .modal-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .modal-btn:hover { opacity: .85; }
+
+  @media (max-width: 600px) {
+    .day-nav { padding: .65rem; gap: .3rem; }
+    .day-btn { min-width: 62px; padding: .45rem .6rem; font-size: .76rem; }
+    .content { padding: 1rem; }
+    .exercise-detail { padding-left: 1.1rem; }
+    .week-bar-inner { gap: .75rem; }
+    .week-num { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Bowflex PR3000 Training</h1>
+  <div class="subtitle">Shoulders, Arms, Back &amp; Ultimate Frisbee Performance</div>
+</div>
+
+<!-- Week Tracker -->
+<div class="week-bar">
+  <div class="week-bar-inner">
+    <div class="week-label-group">
+      <div class="week-heading">Training Week</div>
+      <div class="week-display">
+        <span class="week-num" id="weekNum">1</span>
+        <span class="week-of">of 10</span>
+      </div>
+      <span class="week-phase-badge" id="phaseBadge"></span>
+    </div>
+
+    <div>
+      <div class="week-progress" id="weekProgress"></div>
+    </div>
+
+    <div class="week-controls">
+      <button class="week-btn" id="prevWeek" title="Previous week">&#8249;</button>
+      <button class="week-btn" id="nextWeek" title="Next week">&#8250;</button>
+      <button class="reset-btn" id="pickWeek">Set Week</button>
+    </div>
+  </div>
+</div>
+
+<nav class="day-nav" id="dayNav"></nav>
+
+<div class="content" id="content"></div>
+
+<!-- Week picker modal -->
+<div class="week-picker-overlay" id="pickerOverlay">
+  <div class="week-picker-modal">
+    <h3>Jump to Week</h3>
+    <div class="week-grid" id="weekGrid"></div>
+    <div class="modal-actions">
+      <button class="modal-btn" id="cancelPick">Cancel</button>
+      <button class="modal-btn primary" id="confirmPick">Go to Week</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ────────────────────────────────────────────────────────────────────
+
+const DAYS = [
+  { key: 'sunday',    label: 'Sun', name: 'Sunday',    focus: 'Rest' },
+  { key: 'monday',    label: 'Mon', name: 'Monday',    focus: 'Shoulders' },
+  { key: 'tuesday',   label: 'Tue', name: 'Tuesday',   focus: 'Back' },
+  { key: 'wednesday', label: 'Wed', name: 'Wednesday',  focus: 'Arms' },
+  { key: 'thursday',  label: 'Thu', name: 'Thursday',   focus: 'Throwing' },
+  { key: 'friday',    label: 'Fri', name: 'Friday',     focus: 'Full Upper' },
+  { key: 'saturday',  label: 'Sat', name: 'Saturday',   focus: 'Rest' }
+];
+
+const PHASES = [
+  null, // 1-indexed
+  { id:'foundation', label:'Foundation', weeks:'1–3', icon:'🏗️',
+    badge:'Foundation',
+    title:'Foundation Phase (Weeks 1–3): Learn & Connect',
+    desc:'Focus on movement quality, not load. Use a resistance level where all reps feel controlled. Build the mind-muscle connection — especially on rotator cuff and rotational exercises.' },
+  { id:'foundation', label:'Foundation', weeks:'1–3', icon:'🏗️',
+    badge:'Foundation',
+    title:'Foundation Phase (Weeks 1–3): Learn & Connect',
+    desc:'Focus on movement quality, not load. Use a resistance level where all reps feel controlled. Build the mind-muscle connection — especially on rotator cuff and rotational exercises.' },
+  { id:'foundation', label:'Foundation', weeks:'1–3', icon:'🏗️',
+    badge:'Foundation',
+    title:'Foundation Phase (Weeks 1–3): Learn & Connect',
+    desc:'Focus on movement quality, not load. Use a resistance level where all reps feel controlled. Build the mind-muscle connection — especially on rotator cuff and rotational exercises.' },
+  { id:'build', label:'Build', weeks:'4–6', icon:'📈',
+    badge:'Build',
+    title:'Build Phase (Weeks 4–6): Progressive Overload',
+    desc:'Begin increasing resistance. When you can complete 12 reps with clean form, move up one resistance level. Your compound lifts — presses, rows, pulldowns — should be climbing each week.' },
+  { id:'build', label:'Build', weeks:'4–6', icon:'📈',
+    badge:'Build',
+    title:'Build Phase (Weeks 4–6): Progressive Overload',
+    desc:'Begin increasing resistance. When you can complete 12 reps with clean form, move up one resistance level. Your compound lifts — presses, rows, pulldowns — should be climbing each week.' },
+  { id:'build', label:'Build', weeks:'4–6', icon:'📈',
+    badge:'Build',
+    title:'Build Phase (Weeks 4–6): Progressive Overload',
+    desc:'Begin increasing resistance. When you can complete 12 reps with clean form, move up one resistance level. Your compound lifts — presses, rows, pulldowns — should be climbing each week.' },
+  { id:'push', label:'Push', weeks:'7–9', icon:'🔥',
+    badge:'Push',
+    title:'Push Phase (Weeks 7–9): High Intensity',
+    desc:'Friday\'s heavy compounds drop to 6–8 reps with max resistance. Thursday stays at moderate resistance but prioritize speed and control — training power transfer, not maximal load. Other days: continue adding resistance.' },
+  { id:'push', label:'Push', weeks:'7–9', icon:'🔥',
+    badge:'Push',
+    title:'Push Phase (Weeks 7–9): High Intensity',
+    desc:'Friday\'s heavy compounds drop to 6–8 reps with max resistance. Thursday stays at moderate resistance but prioritize speed and control — training power transfer, not maximal load. Other days: continue adding resistance.' },
+  { id:'push', label:'Push', weeks:'7–9', icon:'🔥',
+    badge:'Push',
+    title:'Push Phase (Weeks 7–9): High Intensity',
+    desc:'Friday\'s heavy compounds drop to 6–8 reps with max resistance. Thursday stays at moderate resistance but prioritize speed and control — training power transfer, not maximal load. Other days: continue adding resistance.' },
+  { id:'deload', label:'Deload', weeks:'10', icon:'🌿',
+    badge:'Deload',
+    title:'Deload Week (Week 10): Active Recovery',
+    desc:'Drop all resistance by ~30% and keep reps in the moderate range (10–12). Let your joints, tendons, and connective tissue recover. After this week, restart the cycle at a higher baseline resistance.' },
+];
+
+// Per-day effort tags by phase
+const EFFORT = {
+  monday: {
+    foundation: { tag: 'Moderate', cls: 'tag-moderate', note: 'Learn the movements. Controlled form on all rotator cuff work.' },
+    build:      { tag: 'Moderate–Heavy', cls: 'tag-moderate', note: 'Increase resistance when 12 reps feel easy.' },
+    push:       { tag: 'Heavy', cls: 'tag-heavy', note: 'Push resistance on press and raises. Rotator cuff stays moderate.' },
+    deload:     { tag: 'Light (−30%)', cls: 'tag-light', note: 'Drop resistance ~30% across all exercises.' }
+  },
+  tuesday: {
+    foundation: { tag: 'Moderate', cls: 'tag-moderate', note: 'Focus on full range of motion. Slow eccentrics on deadlifts.' },
+    build:      { tag: 'Moderate–Heavy', cls: 'tag-moderate', note: 'Add resistance on pulldowns and rows each week.' },
+    push:       { tag: 'Heavy', cls: 'tag-heavy', note: 'Maximize resistance on pulldowns and rows with clean form.' },
+    deload:     { tag: 'Light (−30%)', cls: 'tag-light', note: 'Light weight, full range of motion. Flush the muscles.' }
+  },
+  wednesday: {
+    foundation: { tag: 'Moderate', cls: 'tag-moderate', note: 'Strict form on curls and extensions. No swinging.' },
+    build:      { tag: 'Moderate–Heavy', cls: 'tag-moderate', note: 'Increase resistance on curls and pushdowns when 12 reps feel easy.' },
+    push:       { tag: 'Heavy', cls: 'tag-heavy', note: 'Push the resistance on main lifts. Wrist curls stay moderate.' },
+    deload:     { tag: 'Light (−30%)', cls: 'tag-light', note: 'Light and slow. Protect the wrists and elbows.' }
+  },
+  thursday: {
+    foundation: { tag: 'Moderate', cls: 'tag-moderate', note: 'Focus on rotation mechanics and hip drive. Not a heavy day.' },
+    build:      { tag: 'Moderate', cls: 'tag-moderate', note: 'Moderate resistance, emphasize smooth rotational movement.' },
+    push:       { tag: 'Speed & Control', cls: 'tag-speed', note: 'Moderate weight but move it with intent and speed. Power transfer, not max load.' },
+    deload:     { tag: 'Light (−30%)', cls: 'tag-light', note: 'Go through the motions. Focus on technique.' }
+  },
+  friday: {
+    foundation: { tag: 'Moderate', cls: 'tag-moderate', note: '3×10 on everything. Same as Mon/Tue but ties it together.' },
+    build:      { tag: 'Heavy', cls: 'tag-heavy', note: '4×8 on compounds. Push the resistance — this is your strength day.' },
+    push:       { tag: 'Max Effort', cls: 'tag-heavy', note: '4×6–8 on compounds with maximum resistance. Rest 90–120 sec between sets.' },
+    deload:     { tag: 'Light (−30%)', cls: 'tag-light', note: 'Back off to 3×10 at reduced weight. Just move.' }
+  }
+};
+
+// Workout data with phase-aware reps
+const WORKOUTS = {
+  monday: {
+    title: 'Monday — Shoulders &amp; Rotator Cuff',
+    description: 'Build deltoid size and strength while bulletproofing the rotator cuff — critical for throwing longevity.',
+    note: '3 sets × 10–12 reps. Rest 60–90 sec between sets.',
+    exercises: [
+      { name:'Seated Shoulder Press', sets:3, reps:'10', instructions:'Sit on the bench, press the handles overhead. Full extension, controlled descent. Primary deltoid mass builder.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/CBShoulderPress' },
+      { name:'Lateral Raises (Low Pulley)', sets:3, reps:'12', instructions:'Attach handles to low pulleys. Raise arms out to the sides to shoulder height. Hits the medial deltoid for width.', url:'https://exrx.net/WeightExercises/DeltoidLateral/CBLateralRaise' },
+      { name:'Front Raises (Alternating, Low Pulley)', sets:3, reps:'10 / arm', instructions:'Raise one arm forward to shoulder height. Controls the anterior deltoid used in forehand throws.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/CBFrontRaise' },
+      { name:'Reverse Flyes (High Pulley)', sets:3, reps:'12', instructions:'Face the tower, pull handles outward and back with slightly bent elbows. Posterior deltoid and rhomboid work.', url:'https://exrx.net/WeightExercises/DeltoidPosterior/CBStandingReverseFly' },
+      { name:'External Rotation (Low Pulley)', sets:3, reps:'15', instructions:'Stand sideways to the machine, elbow pinned at 90°. Rotate forearm outward. Essential for rotator cuff health and throwing deceleration.', url:'https://exrx.net/WeightExercises/Infraspinatus/CBStandingExternalRotation' },
+      { name:'Internal Rotation (Low Pulley)', sets:3, reps:'15', instructions:'Rotate forearm inward across body. Strengthens subscapularis for disc release power.', url:'https://exrx.net/WeightExercises/Subscapularis/CBStandingInternalRotation' },
+      { name:'Shrugs (Low Pulley)', sets:3, reps:'12', instructions:'Stand on the platform, handles at sides, shrug straight up. Builds upper traps for shoulder stability.', url:'https://exrx.net/WeightExercises/TrapeziusUpper/CBShrug' }
+    ]
+  },
+  tuesday: {
+    title: 'Tuesday — Back (Upper &amp; Lower)',
+    description: 'The back is the engine behind every throw. Lats generate backhand power, rhomboids stabilize the scapulae, and erectors keep your trunk solid during rotation.',
+    note: '3 sets × 10–12 reps. Rest 60–90 sec between sets.',
+    exercises: [
+      { name:'Wide-Grip Lat Pulldowns', sets:3, reps:'10', instructions:'Use the lat bar, pull to upper chest. Wide grip emphasizes lat width and the pulling motion of a backhand throw.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBFrontPulldown' },
+      { name:'Close-Grip Lat Pulldowns', sets:3, reps:'10', instructions:'Narrow grip, palms facing each other. Shifts emphasis to lower lats and biceps.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBCloseGripPulldown' },
+      { name:'Seated Cable Rows', sets:3, reps:'10', instructions:'Sit facing the tower. Pull handles to your lower ribcage, squeezing shoulder blades together. Primary rhomboid and mid-trap builder.', url:'https://exrx.net/WeightExercises/BackGeneral/CBSeatedRow' },
+      { name:'Straight-Arm Pullovers (Lying, Low Pulley)', sets:3, reps:'12', instructions:'Lie on the bench, arms extended overhead. Pull in an arc to your hips. Isolates the lats through a long range of motion.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBBentoverPullover', video:'https://www.youtube.com/watch?v=6SAL7xWOtpk' },
+      { name:'Stiff-Leg Deadlifts (Low Pulleys)', sets:3, reps:'10', instructions:'Stand on the platform. Hinge at hips with a slight knee bend, lower until you feel a hamstring stretch, then drive back up.', url:'https://exrx.net/WeightExercises/ErectorSpinae/CBStiffLegDeadlift' },
+      { name:'Cable Pull-Throughs (Low Pulley)', sets:3, reps:'12', instructions:'Stand facing away from the tower, straddle the cable. Hinge at the hips and let the handle swing back between your legs, then drive your hips forward to stand tall. Keep your back flat throughout. Excellent erector and glute work.', url:'https://exrx.net/WeightExercises/GluteusMaximus/CBPullThrough' },
+      { name:'Supermans (Bodyweight)', sets:3, reps:'12', instructions:'Lie face down on the floor, arms extended overhead. Simultaneously lift your chest and legs off the ground and hold for 2–3 seconds, then lower. Directly targets the erectors and multifidus. No machine needed — use this as a lower back finisher.', url:'https://exrx.net/WeightExercises/ErectorSpinae/WtSuperman' },
+      { name:'Reverse Flyes (High Pulleys)', sets:3, reps:'12', instructions:'Repeat from Monday — rear delts and upper back benefit from this frequency.', url:'https://exrx.net/WeightExercises/DeltoidPosterior/CBStandingReverseFly' }
+    ]
+  },
+  wednesday: {
+    title: 'Wednesday — Arms &amp; Forearms',
+    description: 'Arm strength finishes every throw. Triceps extend on backhands, biceps control the forehand flick, forearms generate the wrist snap that puts spin on the disc.',
+    note: '3 sets × 10–15 reps. Rest 60–90 sec between sets.',
+    exercises: [
+      { name:'Standing Bicep Curls (Low Pulleys)', sets:3, reps:'10', instructions:'Classic curl. Keep elbows stationary, squeeze at the top.', url:'https://exrx.net/WeightExercises/Biceps/CBCurl' },
+      { name:'Hammer Curls (Low Pulleys)', sets:3, reps:'10', instructions:'Palms facing each other throughout. Hits the brachialis and brachioradialis — key forearm muscles.', url:'https://exrx.net/WeightExercises/Brachioradialis/CBHammerCurl' },
+      { name:'Concentration Curls (Single Low Pulley)', sets:3, reps:'10 / arm', instructions:'Elbow braced against inner thigh. Slow, controlled reps for peak bicep contraction.', url:'https://exrx.net/WeightExercises/Biceps/CBConcentrationCurl' },
+      { name:'Tricep Pushdowns (High Pulley)', sets:3, reps:'10', instructions:'Elbows pinned at sides, press down until arms are straight. Primary tricep mass exercise.', url:'https://exrx.net/WeightExercises/Triceps/CBPushdown' },
+      { name:'Overhead Tricep Extensions (High Pulley)', sets:3, reps:'10', instructions:'Face away from machine, arms overhead. Extend from the elbow. Stretches and loads the long head of the tricep.', url:'https://exrx.net/WeightExercises/Triceps/CBOverheadExtension' },
+      { name:'Lying Tricep Extensions (Low Pulley)', sets:3, reps:'10', instructions:'Lie on bench, lower handles toward forehead by bending elbows, then extend. The "skullcrusher" motion.', url:'https://exrx.net/WeightExercises/Triceps/CBLyingExtension' },
+      { name:'Wrist Curls (Seated, Low Pulley)', sets:3, reps:'15', instructions:'Forearms on thighs, palms up, curl the wrist. Builds the flexors that snap the disc.', url:'https://exrx.net/WeightExercises/WristFlexors/CBWristCurl' },
+      { name:'Reverse Wrist Curls (Seated, Low Pulley)', sets:3, reps:'15', instructions:'Same position, palms down. Strengthens extensors for grip balance and injury prevention.', url:'https://exrx.net/WeightExercises/WristExtensors/CBReverseWristCurl' }
+    ]
+  },
+  thursday: {
+    title: 'Thursday — Functional Throwing Power',
+    description: 'Sport-specific day. Every exercise mimics or supports the throwing motion: rotation, single-arm pulling, and core transfer.',
+    note: '3 sets × 10–12 reps per side. Rest 60–90 sec.',
+    exercises: [
+      { name:'Standing Trunk Rotation (Single Pulley)', sets:3, reps:'12 / side', instructions:'Stand sideways to the tower, pull the handle across your body in a rotating motion. Mimics the backhand throw path. Drive from the hips.', url:'https://exrx.net/WeightExercises/Obliques/CBStandingTwist' },
+      { name:'Single-Arm Cable Rows (Low Pulley)', sets:3, reps:'10 / arm', instructions:'Pull with one arm while resisting rotation through your core. Trains the asymmetric pulling pattern of throwing.', url:'https://exrx.net/WeightExercises/BackGeneral/CBOneArmSeatedRow' },
+      { name:'Cross-Body Cable Pulls (Low to High)', sets:3, reps:'10 / side', instructions:'Start low on one side, pull diagonally up and across your body. Replicates the forehand throw arc and trains rotational power.', url:'https://exrx.net/WeightExercises/Obliques/CBWoodchop' },
+      { name:'Single-Arm Shoulder Press', sets:3, reps:'10 / arm', instructions:'Pressing with one arm forces core stabilization under load, just like bracing during a throw.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/CBOneArmShoulderPress' },
+      { name:'Internal Rotation at 90° Abduction', sets:3, reps:'12 / arm', instructions:'Arm out to the side at shoulder height, elbow bent 90°. Rotate hand forward and down — this is the exact motion of disc release.', url:'https://exrx.net/WeightExercises/Subscapularis/CBInternalRotationArm90' },
+      { name:'Single-Arm Lat Pulldown', sets:3, reps:'10 / arm', instructions:'Unilateral lat work to address imbalances between throwing and non-throwing sides.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBOneArmPulldown' },
+      { name:'Pallof Press (Mid Pulley)', sets:3, reps:'10 / side', instructions:'Face perpendicular to the cable. Press straight out and hold 2 seconds — resist the rotation. Builds anti-rotation stability to protect your spine during throws.', url:'https://exrx.net/WeightExercises/RectusAbdominis/CBPallofPress' }
+    ]
+  },
+  friday: {
+    title: 'Friday — Full Upper Body &amp; Back Integration',
+    description: 'Compound, heavier work that ties the week together. Lower reps push strength and progressive overload.',
+    // note is phase-aware, handled in render
+    exercises: [
+      { name:'Seated Shoulder Press', sets:'4', reps_default:'10', reps_build:'8', reps_push:'6–8', instructions:'Heavier than Monday. Push for progressive overload.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/CBShoulderPress', heavy:true },
+      { name:'Wide-Grip Lat Pulldowns', sets:'4', reps_default:'10', reps_build:'8', reps_push:'6–8', instructions:'Increase resistance from Tuesday\'s session. Strong contraction at the bottom.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBFrontPulldown', heavy:true },
+      { name:'Seated Cable Rows', sets:'4', reps_default:'10', reps_build:'8', reps_push:'6–8', instructions:'Drive elbows back, hold the squeeze for a full second at peak contraction.', url:'https://exrx.net/WeightExercises/BackGeneral/CBSeatedRow', heavy:true },
+      { name:'Standing Bicep Curls', sets:'3', reps_default:'10', reps_build:'10', reps_push:'10', instructions:'Moderate weight, clean form. Focus on the contraction.', url:'https://exrx.net/WeightExercises/Biceps/CBCurl' },
+      { name:'Tricep Pushdowns', sets:'3', reps_default:'10', reps_build:'10', reps_push:'10', instructions:'Push the resistance slightly from Wednesday if form allows.', url:'https://exrx.net/WeightExercises/Triceps/CBPushdown' },
+      { name:'Lateral Raises', sets:'3', reps_default:'12', reps_build:'12', reps_push:'12', instructions:'Finish with a shoulder pump to cap the week. Controlled tempo.', url:'https://exrx.net/WeightExercises/DeltoidLateral/CBLateralRaise' },
+      { name:'Shrugs', sets:'3', reps_default:'12', reps_build:'12', reps_push:'12', instructions:'Final upper trap work. Squeeze at the top for a full second.', url:'https://exrx.net/WeightExercises/TrapeziusUpper/CBShrug' }
+    ]
+  }
+};
+
+const linkIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5zm7.25-.75a.75.75 0 01.75-.75h3.5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V6.31l-5.47 5.47a.75.75 0 01-1.06-1.06l5.47-5.47H12.25a.75.75 0 01-.75-.75z" clip-rule="evenodd"/></svg>`;
+
+// ── State ────────────────────────────────────────────────────────────────────
+let currentWeek = parseInt(localStorage.getItem('bowflex_week') || '1');
+let activeDay = null;
+let pickerSelected = currentWeek;
+
+function saveWeek() { localStorage.setItem('bowflex_week', currentWeek); }
+
+function getPhase(w) {
+  if (w <= 3) return 'foundation';
+  if (w <= 6) return 'build';
+  if (w <= 9) return 'push';
+  return 'deload';
+}
+
+// ── Week Bar ─────────────────────────────────────────────────────────────────
+function renderWeekBar() {
+  const phase = PHASES[currentWeek];
+  document.getElementById('weekNum').textContent = currentWeek;
+
+  const badge = document.getElementById('phaseBadge');
+  badge.className = `week-phase-badge phase-${phase.id}`;
+  badge.textContent = `${phase.icon} ${phase.badge}  •  Wks ${phase.weeks}`;
+
+  const prog = document.getElementById('weekProgress');
+  prog.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const d = document.createElement('div');
+    d.className = 'week-dot';
+    if (i < currentWeek) d.classList.add('done');
+    else if (i === currentWeek) d.classList.add(phase.id === 'deload' ? 'deload' : 'current');
+    d.title = `Week ${i}`;
+    d.addEventListener('click', () => { currentWeek = i; saveWeek(); renderWeekBar(); renderContent(DAYS[activeDay].key); });
+    prog.appendChild(d);
+  }
+
+  document.getElementById('prevWeek').disabled = currentWeek <= 1;
+  document.getElementById('nextWeek').disabled = currentWeek >= 10;
+}
+
+document.getElementById('prevWeek').addEventListener('click', () => {
+  if (currentWeek > 1) { currentWeek--; saveWeek(); renderWeekBar(); renderContent(DAYS[activeDay].key); }
+});
+document.getElementById('nextWeek').addEventListener('click', () => {
+  if (currentWeek < 10) { currentWeek++; saveWeek(); renderWeekBar(); renderContent(DAYS[activeDay].key); }
+});
+
+// ── Week Picker Modal ────────────────────────────────────────────────────────
+const overlay = document.getElementById('pickerOverlay');
+
+function openPicker() {
+  pickerSelected = currentWeek;
+  const grid = document.getElementById('weekGrid');
+  grid.innerHTML = '';
+  const phaseNames = ['','Foundation','Foundation','Foundation','Build','Build','Build','Push','Push','Push','Deload'];
+  for (let i = 1; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'week-pick-btn' + (i === pickerSelected ? ' selected' : '');
+    btn.innerHTML = `W${i}<span class="pick-phase">${phaseNames[i]}</span>`;
+    btn.addEventListener('click', () => {
+      pickerSelected = i;
+      grid.querySelectorAll('.week-pick-btn').forEach((b, idx) => b.classList.toggle('selected', idx + 1 === i));
+    });
+    grid.appendChild(btn);
+  }
+  overlay.classList.add('open');
+}
+
+document.getElementById('pickWeek').addEventListener('click', openPicker);
+document.getElementById('cancelPick').addEventListener('click', () => overlay.classList.remove('open'));
+document.getElementById('confirmPick').addEventListener('click', () => {
+  currentWeek = pickerSelected;
+  saveWeek();
+  overlay.classList.remove('open');
+  renderWeekBar();
+  renderContent(DAYS[activeDay].key);
+});
+overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+
+// ── Day Nav ──────────────────────────────────────────────────────────────────
+function getTodayIndex() { return new Date().getDay(); }
+
+function renderNav() {
+  const nav = document.getElementById('dayNav');
+  const todayIdx = getTodayIndex();
+  nav.innerHTML = '';
+  DAYS.forEach((d, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'day-btn';
+    if (i === todayIdx) btn.classList.add('today-marker');
+    btn.innerHTML = `<span class="day-label">${d.label}</span><span>${d.name}</span><span class="day-focus">${d.focus}</span>`;
+    btn.addEventListener('click', () => selectDay(i));
+    nav.appendChild(btn);
+  });
+}
+
+function selectDay(idx) {
+  activeDay = idx;
+  document.querySelectorAll('.day-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  renderContent(DAYS[idx].key);
+}
+
+// ── Content ──────────────────────────────────────────────────────────────────
+function renderContent(dayKey) {
+  const el = document.getElementById('content');
+  const phase = getPhase(currentWeek);
+
+  if (dayKey === 'saturday' || dayKey === 'sunday') {
+    el.innerHTML = `
+      <div class="rest-day">
+        <div class="rest-icon">🌿</div>
+        <h2>Rest &amp; Recovery</h2>
+        <p>Your muscles grow during rest, not during training. Use today for light activity and recovery.</p>
+        <div class="rest-suggestions">
+          <span class="rest-chip">Light stretching</span>
+          <span class="rest-chip">Foam rolling</span>
+          <span class="rest-chip">Walk or easy jog</span>
+          <span class="rest-chip">Grip squeezes</span>
+        </div>
+      </div>
+      <div class="info-section">
+        <h3>Optional Off-Machine Extras</h3>
+        <p>Wrist roller or grip squeezes for forearm endurance. Push-ups (regular and diamond) for extra arm volume. Dead hangs if you have a bar — great for grip, shoulder health, and spinal decompression.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const w = WORKOUTS[dayKey];
+  if (!w) return;
+
+  const effortInfo = EFFORT[dayKey] ? EFFORT[dayKey][phase] : null;
+  const phaseInfo = PHASES[currentWeek];
+
+  // Effort banner
+  let effortHtml = '';
+  if (effortInfo) {
+    effortHtml = `
+      <div class="effort-banner effort-${phase}">
+        <div class="effort-icon">${phaseInfo.icon}</div>
+        <div class="effort-body">
+          <div class="effort-title">Week ${currentWeek} · ${effortInfo.tag}</div>
+          <div class="effort-desc">${effortInfo.note}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Workout note (Friday is phase-aware)
+  let noteText = w.note || '3 sets × 10–12 reps. Rest 60–90 sec between sets.';
+  if (dayKey === 'friday') {
+    if (phase === 'foundation') noteText = '3 sets × 10 reps. Rest 60–90 sec. Same tempo as Mon/Tue.';
+    else if (phase === 'build') noteText = '4 sets × 8 reps on compounds, 3 × 10–12 on accessories. Rest 90 sec.';
+    else if (phase === 'push') noteText = '4 sets × 6–8 reps on compounds (max effort). 3 × 10 on accessories. Rest 90–120 sec.';
+    else noteText = '3 sets × 10 reps at reduced resistance (−30%). Rest 60 sec.';
+  }
+  if (phase === 'deload') noteText = 'Deload week — reduce all resistance by ~30%. Keep reps at 10–12, slow and controlled.';
+
+  let html = `
+    <div class="day-header">
+      <h2>${w.title}</h2>
+      <p>${w.description}</p>
+    </div>
+    ${effortHtml}
+    <div class="workout-note">${noteText}</div>
+  `;
+
+  w.exercises.forEach((ex, i) => {
+    // Resolve reps based on phase
+    let reps = ex.reps;
+    if (ex.reps_default !== undefined) {
+      if (phase === 'push') reps = ex.heavy ? ex.reps_push : ex.reps_default;
+      else if (phase === 'build') reps = ex.heavy ? ex.reps_build : ex.reps_default;
+      else reps = ex.reps_default;
+    }
+
+    // Effort tag for the exercise
+    let effortTagHtml = '';
+    if (effortInfo) {
+      const isHeavyExercise = ex.heavy && (phase === 'push' || phase === 'build');
+      const isDeload = phase === 'deload';
+      const isSpeed = phase === 'push' && dayKey === 'thursday';
+      let tagCls = effortInfo.cls;
+      if (isHeavyExercise) tagCls = 'tag-heavy';
+      if (isDeload) tagCls = 'tag-light';
+      if (isSpeed) tagCls = 'tag-speed';
+      effortTagHtml = `<span class="meta-tag tag-effort ${tagCls}">${effortInfo.tag}</span>`;
+    }
+
+    let setsDisplay = ex.sets;
+    if (dayKey === 'friday' && ex.heavy) {
+      if (phase === 'foundation') setsDisplay = 3;
+      else setsDisplay = 4;
+    }
+
+    html += `
+      <div class="exercise-card" onclick="this.classList.toggle('open')">
+        <div class="exercise-top">
+          <div class="exercise-num">${i + 1}</div>
+          <div class="exercise-info">
+            <div class="exercise-name">${ex.name}</div>
+            <div class="exercise-meta">
+              <span class="meta-tag tag-sets">${setsDisplay} sets</span>
+              <span class="meta-tag tag-reps">${reps} reps</span>
+              ${effortTagHtml}
+            </div>
+          </div>
+          <div class="expand-arrow">&#9662;</div>
+        </div>
+        <div class="exercise-detail">
+          <p>${ex.instructions}</p>
+          <a class="exrx-link" href="${ex.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+            ${linkIcon} View on ExRx.net
+          </a>
+          ${ex.video ? `<a class="exrx-link" href="${ex.video}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="margin-left:.5rem;background:rgba(255,0,0,.1);color:#ff6b6b;border:none;">▶ Watch on YouTube</a>` : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  html += `
+    <div class="info-section">
+      <h3>Warm-Up Reminder</h3>
+      <p>5 minutes before every session: light arm circles, band pull-aparts, and 10–15 bodyweight squats. Never go into shoulder or rotational work cold.</p>
+    </div>
+  `;
+
+  el.innerHTML = html;
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+renderNav();
+renderWeekBar();
+selectDay(getTodayIndex());
+</script>
+</body>
+</html>
