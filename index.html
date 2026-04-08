@@ -558,7 +558,6 @@ const WORKOUTS = {
     exercises: [
       { name:'Wide-Grip Lat Pulldowns', sets:3, reps:'10', instructions:'Use the lat bar, pull to upper chest. Wide grip emphasizes lat width and the pulling motion of a backhand throw.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBFrontPulldown' },
       { name:'Close-Grip Lat Pulldowns', sets:3, reps:'10', instructions:'Narrow grip, palms facing each other. Shifts emphasis to lower lats and biceps.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBCloseGripPulldown' },
-      { name:'Seated Cable Rows', sets:3, reps:'10', instructions:'Sit facing the tower. Pull handles to your lower ribcage, squeezing shoulder blades together. Primary rhomboid and mid-trap builder.', url:'https://exrx.net/WeightExercises/BackGeneral/CBSeatedRow' },
       { name:'Straight-Arm Pullovers (Lying, Low Pulley)', sets:3, reps:'12', instructions:'Lie on the bench, arms extended overhead. Pull in an arc to your hips. Isolates the lats through a long range of motion.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBBentoverPullover', video:'https://www.youtube.com/watch?v=6SAL7xWOtpk' },
       { name:'Stiff-Leg Deadlifts (Low Pulleys)', sets:3, reps:'10', instructions:'Stand on the platform. Hinge at hips with a slight knee bend, lower until you feel a hamstring stretch, then drive back up.', url:'https://exrx.net/WeightExercises/ErectorSpinae/CBStiffLegDeadlift' },
       { name:'Cable Pull-Throughs (Low Pulley)', sets:3, reps:'12', instructions:'Stand facing away from the tower, straddle the cable. Hinge at the hips and let the handle swing back between your legs, then drive your hips forward to stand tall. Keep your back flat throughout. Excellent erector and glute work.', url:'https://exrx.net/WeightExercises/GluteusMaximus/CBPullThrough', video:'https://www.youtube.com/watch?v=VRDxdi2d-2c' },
@@ -572,11 +571,10 @@ const WORKOUTS = {
     note: '3 sets × 10–15 reps. Rest 60–90 sec between sets.',
     exercises: [
       { name:'Standing Bicep Curls (Low Pulleys)', sets:3, reps:'10', instructions:'Classic curl. Keep elbows stationary, squeeze at the top.', url:'https://exrx.net/WeightExercises/Biceps/CBCurl' },
-      { name:'Hammer Curls (Low Pulleys)', sets:3, reps:'10', instructions:'Palms facing each other throughout. Hits the brachialis and brachioradialis — key forearm muscles.', url:'https://exrx.net/WeightExercises/Brachioradialis/CBHammerCurl' },
-      { name:'Concentration Curls (Single Low Pulley)', sets:3, reps:'10 / arm', instructions:'Elbow braced against inner thigh. Slow, controlled reps for peak bicep contraction.', url:'https://exrx.net/WeightExercises/Biceps/CBConcentrationCurl' },
+      { name:'Reverse Curls (Low Pulleys)', sets:3, reps:'10', instructions:'Grip the handles with palms facing down (pronated) and keep that orientation throughout the entire curl — do not let the wrists rotate. Stand upright, pin your elbows at your sides, and curl up until your forearms are roughly parallel to the floor. Lower slowly under control. The cable\'s constant tension through the full range of motion makes this more effective than the dumbbell version. Directly targets the brachioradialis and brachialis — the same muscles hammer curls work.', url:'https://exrx.net/WeightExercises/Brachioradialis/CBReverseCurl' },
+      { name:'Concentration Curls (Single Low Pulley)', sets:3, reps:'10 / arm', instructions:'Elbow braced against inner thigh. Slow, controlled reps for peak bicep contraction.', url:'https://exrx.net/WeightExercises/Brachialis/CBConcentrationCurl' },
       { name:'Tricep Pushdowns (High Pulley)', sets:3, reps:'10', instructions:'Elbows pinned at sides, press down until arms are straight. Primary tricep mass exercise.', url:'https://exrx.net/WeightExercises/Triceps/CBPushdown' },
-      { name:'Overhead Tricep Extensions (High Pulley)', sets:3, reps:'10', instructions:'Face away from machine, arms overhead. Extend from the elbow. Stretches and loads the long head of the tricep.', url:'https://exrx.net/WeightExercises/Triceps/CBOverheadExtension' },
-      { name:'Lying Tricep Extensions (Low Pulley)', sets:3, reps:'10', instructions:'Lie on bench, lower handles toward forehead by bending elbows, then extend. The "skullcrusher" motion.', url:'https://exrx.net/WeightExercises/Triceps/CBLyingExtension' },
+      { name:'Overhead Tricep Extensions (High Pulley)', sets:3, reps:'10', instructions:'Face away from machine, arms overhead. Extend from the elbow. Stretches and loads the long head of the tricep. See Triceps Extension in bowflex manual.', url:'https://exrx.net/WeightExercises/Triceps/CBOverheadExtension', video:'https://www.youtube.com/watch?v=ns-RGsbzqok' },
       { name:'Wrist Curls (Seated, Low Pulley)', sets:3, reps:'15', instructions:'Forearms on thighs, palms up, curl the wrist. Builds the flexors that snap the disc.', url:'https://exrx.net/WeightExercises/WristFlexors/CBWristCurl' },
       { name:'Reverse Wrist Curls (Seated, Low Pulley)', sets:3, reps:'15', instructions:'Same position, palms down. Strengthens extensors for grip balance and injury prevention.', url:'https://exrx.net/WeightExercises/WristExtensors/CBReverseWristCurl' }
     ]
@@ -586,13 +584,13 @@ const WORKOUTS = {
     description: 'Sport-specific day. Every exercise mimics or supports the throwing motion: rotation, single-arm pulling, and core transfer.',
     note: '3 sets × 10–12 reps per side. Rest 60–90 sec.',
     exercises: [
-      { name:'Standing Trunk Rotation (Single Pulley)', sets:3, reps:'12 / side', instructions:'Stand sideways to the tower, pull the handle across your body in a rotating motion. Mimics the backhand throw path. Drive from the hips.', url:'https://exrx.net/WeightExercises/Obliques/CBStandingTwist' },
-      { name:'Single-Arm Cable Rows (Low Pulley)', sets:3, reps:'10 / arm', instructions:'Pull with one arm while resisting rotation through your core. Trains the asymmetric pulling pattern of throwing.', url:'https://exrx.net/WeightExercises/BackGeneral/CBOneArmSeatedRow' },
-      { name:'Cross-Body Cable Pulls (Low to High)', sets:3, reps:'10 / side', instructions:'Start low on one side, pull diagonally up and across your body. Replicates the forehand throw arc and trains rotational power.', url:'https://exrx.net/WeightExercises/Obliques/CBWoodchop' },
-      { name:'Single-Arm Shoulder Press', sets:3, reps:'10 / arm', instructions:'Pressing with one arm forces core stabilization under load, just like bracing during a throw.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/CBOneArmShoulderPress' },
-      { name:'Internal Rotation at 90° Abduction', sets:3, reps:'12 / arm', instructions:'Arm out to the side at shoulder height, elbow bent 90°. Rotate hand forward and down — this is the exact motion of disc release.', url:'https://exrx.net/WeightExercises/Subscapularis/CBInternalRotationArm90' },
-      { name:'Single-Arm Lat Pulldown', sets:3, reps:'10 / arm', instructions:'Unilateral lat work to address imbalances between throwing and non-throwing sides.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBOneArmPulldown' },
-      { name:'Pallof Press (Mid Pulley)', sets:3, reps:'10 / side', instructions:'Face perpendicular to the cable. Press straight out and hold 2 seconds — resist the rotation. Builds anti-rotation stability to protect your spine during throws.', url:'https://exrx.net/WeightExercises/RectusAbdominis/CBPallofPress' }
+      { name:'Standing Trunk Rotation (Single Pulley)', sets:3, reps:'12 / side', instructions:'Stand sideways to the tower, pull the handle across your body in a rotating motion. Mimics the backhand throw path. Drive from the hips. See Trunk Rotation in bowflex manual.', url:'https://exrx.net/WeightExercises/Obliques/CBStandingTwist' },
+      { name:'Single-Arm Cable Rows (Low Pulley)', sets:3, reps:'10 / arm', instructions:'Pull with one arm while resisting rotation through your core. Trains the asymmetric pulling pattern of throwing.', url:'https://exrx.net/WeightExercises/DeltoidLateral/CBOneArmUprightRow' },
+      { name:'Cross-Body Cable Pulls (Low to High)', sets:3, reps:'10 / side', instructions:'Start low on one side, pull diagonally up and across your body. Replicates the forehand throw arc and trains rotational power.', url:'https://www.youtube.com/watch?v=Am8PfTpwiCY' },
+      { name:'Single-Arm Shoulder Press', sets:3, reps:'10 / arm', instructions:'Pressing with one arm forces core stabilization under load, just like bracing during a throw.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/CBShoulderPress' },
+      { name:'Internal Rotation at 90° Abduction', sets:3, reps:'12 / arm', instructions:'Arm out to the side at shoulder height, elbow bent 90°. Rotate hand forward and down — this is the exact motion of disc release.', url:'https://www.youtube.com/watch?v=blY9W2WccBY' },
+      { name:'Single-Arm Lat Pulldown', sets:3, reps:'10 / arm', instructions:'Unilateral lat work to address imbalances between throwing and non-throwing sides.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBOneArmPulldown', video:'https://www.youtube.com/watch?v=eM162KNncD8', note_url:'https://www.hevyapp.com/exercises/how-to-single-arm-lat-pulldown/' },
+      { name:'Pallof Press (Mid Pulley)', sets:3, reps:'10 / side', instructions:'Face perpendicular to the cable. Press straight out and hold 2 seconds — resist the rotation. Builds anti-rotation stability to protect your spine during throws.', url:'https://exrx.net/WeightExercises/RectusAbdominis/CBPallofPress', video:'https://www.youtube.com/watch?v=ma2OjgP5XDc' }
     ]
   },
   friday: {
@@ -602,7 +600,6 @@ const WORKOUTS = {
     exercises: [
       { name:'Seated Shoulder Press', sets:'4', reps_default:'10', reps_build:'8', reps_push:'6–8', instructions:'Heavier than Monday. Push for progressive overload.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/CBShoulderPress', heavy:true },
       { name:'Wide-Grip Lat Pulldowns', sets:'4', reps_default:'10', reps_build:'8', reps_push:'6–8', instructions:'Increase resistance from Tuesday\'s session. Strong contraction at the bottom.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBFrontPulldown', heavy:true },
-      { name:'Seated Cable Rows', sets:'4', reps_default:'10', reps_build:'8', reps_push:'6–8', instructions:'Drive elbows back, hold the squeeze for a full second at peak contraction.', url:'https://exrx.net/WeightExercises/BackGeneral/CBSeatedRow', heavy:true },
       { name:'Standing Bicep Curls', sets:'3', reps_default:'10', reps_build:'10', reps_push:'10', instructions:'Moderate weight, clean form. Focus on the contraction.', url:'https://exrx.net/WeightExercises/Biceps/CBCurl' },
       { name:'Tricep Pushdowns', sets:'3', reps_default:'10', reps_build:'10', reps_push:'10', instructions:'Push the resistance slightly from Wednesday if form allows.', url:'https://exrx.net/WeightExercises/Triceps/CBPushdown' },
       { name:'Lateral Raises', sets:'3', reps_default:'12', reps_build:'12', reps_push:'12', instructions:'Finish with a shoulder pump to cap the week. Controlled tempo.', url:'https://exrx.net/WeightExercises/DeltoidLateral/CBLateralRaise' },
@@ -823,10 +820,11 @@ function renderContent(dayKey) {
         </div>
         <div class="exercise-detail">
           <p>${ex.instructions}</p>
-          <a class="exrx-link" href="${ex.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
-            ${linkIcon} View on ExRx.net
-          </a>
-          ${ex.video ? `<a class="exrx-link" href="${ex.video}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="margin-left:.5rem;background:rgba(255,0,0,.1);color:#ff6b6b;border:none;">▶ Watch on YouTube</a>` : ''}
+          ${ex.url ? (ex.url.includes('youtube.com') ?
+            `<a class="exrx-link" href="${ex.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="background:rgba(255,0,0,.1);color:#ff6b6b;">▶ Watch on YouTube</a>` :
+            `<a class="exrx-link" href="${ex.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${linkIcon} View on ExRx.net</a>`) : ''}
+          ${ex.video ? `<a class="exrx-link" href="${ex.video}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="margin-left:.5rem;background:rgba(255,0,0,.1);color:#ff6b6b;">▶ Watch on YouTube</a>` : ''}
+          ${ex.note_url ? `<a class="exrx-link" href="${ex.note_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="margin-left:.5rem;background:rgba(116,185,255,.1);color:#74b9ff;">&#128279; Exercise Guide</a>` : ''}
         </div>
       </div>
     `;
