@@ -387,6 +387,179 @@
   .modal-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .modal-btn:hover { opacity: .85; }
 
+  /* ── CARD RIGHT META ── */
+  .card-right-meta {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    flex-shrink: 0;
+    margin-left: auto;
+    padding-right: .4rem;
+  }
+  .weight-badge {
+    font-size: .7rem;
+    padding: .18rem .5rem;
+    border-radius: 5px;
+    background: rgba(253,203,110,.12);
+    color: var(--orange);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .done-badge {
+    font-size: .85rem;
+    color: var(--green);
+    line-height: 1;
+  }
+  .pending-badge {
+    font-size: .85rem;
+    color: var(--border);
+    line-height: 1;
+  }
+
+  /* ── SETUP SECTION ── */
+  .setup-section {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: .7rem .9rem;
+    margin-bottom: .75rem;
+  }
+  .setup-label {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: .5rem;
+  }
+  .seat-row {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+  }
+  .seat-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    cursor: pointer;
+    font-size: .83rem;
+    color: var(--text-dim);
+    user-select: none;
+  }
+  .seat-toggle-label input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+  .bar-pos-row {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    margin-top: .5rem;
+    flex-wrap: wrap;
+  }
+  .bar-pos-label { font-size: .78rem; color: var(--text-dim); margin-right: .1rem; }
+  .bar-pos-btn {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .bar-pos-btn:hover { border-color: var(--accent); color: var(--text); }
+  .bar-pos-btn.sel { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ── WEIGHT CONTROLS ── */
+  .weight-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .75rem;
+  }
+  .weight-label { font-size: .78rem; color: var(--text-dim); margin-right: .2rem; }
+  .wt-btn {
+    width: 30px; height: 30px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+    line-height: 1;
+  }
+  .wt-btn:hover { border-color: var(--accent); background: rgba(108,92,231,.15); }
+  .wt-input {
+    width: 70px;
+    text-align: center;
+    font-weight: 700;
+    font-size: .9rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: .3rem .4rem;
+    color: var(--text);
+  }
+  .wt-input:focus { outline: none; border-color: var(--accent); }
+  .wt-unit { font-size: .8rem; color: var(--text-dim); }
+
+  /* ── COMPLETE BUTTON ── */
+  .complete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .4rem .85rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    margin-bottom: .85rem;
+  }
+  .complete-btn:hover { border-color: var(--green); color: var(--green); }
+  .complete-btn.done { background: rgba(0,184,148,.12); border-color: var(--green); color: var(--green); }
+
+  /* ── DETAIL DIVIDER ── */
+  .detail-divider {
+    height: 1px;
+    background: var(--border);
+    margin: .75rem 0;
+  }
+
+  /* ── EXPORT/IMPORT TOOLBAR ── */
+  .data-toolbar {
+    display: flex;
+    gap: .5rem;
+    justify-content: center;
+    padding: .6rem 1.5rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .35rem .8rem;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .toolbar-btn:hover { border-color: var(--accent); color: var(--text); }
+  .toolbar-btn.import-btn:hover { border-color: var(--green); }
+  .toolbar-btn svg { width: 13px; height: 13px; }
+
   @media (max-width: 600px) {
     .day-nav { padding: .65rem; gap: .3rem; }
     .day-btn { min-width: 62px; padding: .45rem .6rem; font-size: .76rem; }
@@ -428,6 +601,19 @@
   </div>
 </div>
 
+<!-- Export / Import toolbar -->
+<div class="data-toolbar">
+  <button class="toolbar-btn" id="exportBtn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+    Export Settings
+  </button>
+  <button class="toolbar-btn import-btn" id="importBtn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.707-10.293a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414-1.414z" clip-rule="evenodd"/></svg>
+    Import Settings
+  </button>
+</div>
+<input type="file" id="importFileInput" accept=".json" style="display:none">
+
 <nav class="day-nav" id="dayNav"></nav>
 
 <div class="content" id="content"></div>
@@ -445,6 +631,143 @@
 </div>
 
 <script>
+// ── Persistent Data ──────────────────────────────────────────────────────────
+// Structure:
+// bowflex_data = {
+//   setup:     { "Exercise Name": { seatRequired: bool, barPosition: 1-6|null } }
+//   weights:   { "monday::Exercise Name": number }
+//   completed: { "monday::Exercise Name::YYYY-MM-DD": true }
+// }
+
+const DATA_KEY = 'bowflex_data';
+
+// Safe ID for HTML attributes — strips everything non-alphanumeric to underscores
+function toId(str) { return str.replace(/[^a-zA-Z0-9]/g, '_'); }
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(DATA_KEY)) || { setup:{}, weights:{}, completed:{} }; }
+  catch(e) { return { setup:{}, weights:{}, completed:{} }; }
+}
+
+function saveData(d) {
+  localStorage.setItem(DATA_KEY, JSON.stringify(d));
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// Weight
+function getWeight(dayKey, exName) {
+  const d = loadData();
+  return d.weights[`${dayKey}::${exName}`] ?? 0;
+}
+function setWeight(dayKey, exName, val) {
+  const d = loadData();
+  const v = Math.max(0, parseFloat(val) || 0);
+  d.weights[`${dayKey}::${exName}`] = v;
+  saveData(d);
+  const badge = document.getElementById(`wbadge-${toId(dayKey+'_'+exName)}`);
+  if (badge) badge.textContent = v > 0 ? v + ' lbs' : '—';
+}
+function adjustWeight(dayKey, exName, delta) {
+  const cur = getWeight(dayKey, exName);
+  const next = Math.max(0, Math.round((cur + delta) * 10) / 10);
+  setWeight(dayKey, exName, next);
+  const inp = document.getElementById(`winp-${toId(dayKey+'_'+exName)}`);
+  if (inp) inp.value = next;
+}
+
+// Completion
+function isCompleted(dayKey, exName) {
+  const d = loadData();
+  return !!d.completed[`${dayKey}::${exName}::${todayStr()}`];
+}
+function toggleComplete(dayKey, exName) {
+  const d = loadData();
+  const key = `${dayKey}::${exName}::${todayStr()}`;
+  if (d.completed[key]) delete d.completed[key];
+  else d.completed[key] = true;
+  saveData(d);
+  _refreshCompleteUI(dayKey, exName);
+}
+function _refreshCompleteUI(dayKey, exName) {
+  const done = isCompleted(dayKey, exName);
+  const safeKey = toId(dayKey+'_'+exName);
+  const btn = document.getElementById(`cbtn-${safeKey}`);
+  const badge = document.getElementById(`cdot-${safeKey}`); // safeKey already set above
+  if (btn) {
+    btn.className = 'complete-btn' + (done ? ' done' : '');
+    btn.innerHTML = done ? '✓ Completed today!' : '○ Mark Complete';
+  }
+  if (badge) {
+    badge.className = done ? 'done-badge' : 'pending-badge';
+    badge.textContent = done ? '✓' : '○';
+  }
+}
+
+// Setup (seat + bar position)
+function getSetup(exName) {
+  const d = loadData();
+  return d.setup[exName] || { seatRequired: false, barPosition: null };
+}
+function setSeatRequired(exName, val) {
+  const d = loadData();
+  if (!d.setup[exName]) d.setup[exName] = { seatRequired: false, barPosition: null };
+  d.setup[exName].seatRequired = val;
+  saveData(d);
+  const barRow = document.getElementById(`bar-${toId(exName)}`);
+  if (barRow) barRow.style.display = val ? 'flex' : 'none';
+}
+function setBarPosition(exName, pos) {
+  const d = loadData();
+  if (!d.setup[exName]) d.setup[exName] = { seatRequired: false, barPosition: null };
+  d.setup[exName].barPosition = pos;
+  saveData(d);
+  document.querySelectorAll(`.bpb-${toId(exName)}`).forEach(b => {
+    b.classList.toggle('sel', parseInt(b.dataset.pos) === pos);
+  });
+}
+
+// ── Export / Import ──────────────────────────────────────────────────────────
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const payload = {
+    exportDate: todayStr(),
+    week: currentWeek,
+    data: loadData()
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bowflex-settings-${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('importFileInput').click();
+});
+
+document.getElementById('importFileInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const payload = JSON.parse(ev.target.result);
+      if (payload.data) {
+        saveData(payload.data);
+        if (payload.week) { currentWeek = payload.week; saveWeek(); renderWeekBar(); }
+        renderContent(DAYS[activeDay].key);
+        alert('Settings imported successfully!');
+      } else { alert('Invalid settings file.'); }
+    } catch(err) { alert('Could not read file: ' + err.message); }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+
 // ── Data ────────────────────────────────────────────────────────────────────
 
 const DAYS = [
@@ -785,7 +1108,7 @@ function renderContent(dayKey) {
       else reps = ex.reps_default;
     }
 
-    // Effort tag for the exercise
+    // Effort tag
     let effortTagHtml = '';
     if (effortInfo) {
       const isHeavyExercise = ex.heavy && (phase === 'push' || phase === 'build');
@@ -800,13 +1123,71 @@ function renderContent(dayKey) {
 
     let setsDisplay = ex.sets;
     if (dayKey === 'friday' && ex.heavy) {
-      if (phase === 'foundation') setsDisplay = 3;
-      else setsDisplay = 4;
+      setsDisplay = phase === 'foundation' ? 3 : 4;
     }
 
+    // Persistent data for this exercise
+    const weight   = getWeight(dayKey, ex.name);
+    const done     = isCompleted(dayKey, ex.name);
+    const setup    = getSetup(ex.name);
+    const safeKey  = toId(dayKey + '_' + ex.name);
+    const safeExName = toId(ex.name);
+
+    // Weight badge & complete dot in collapsed header
+    const weightBadgeHtml = `<span class="weight-badge" id="wbadge-${safeKey}">${weight > 0 ? weight + ' lbs' : '—'}</span>`;
+    const completeDotHtml = `<span class="${done ? 'done-badge' : 'pending-badge'}" id="cdot-${safeKey}">${done ? '✓' : '○'}</span>`;
+
+    // Setup section
+    const barPosHtml = [1,2,3,4,5,6].map(n =>
+      `<button class="bar-pos-btn bpb-${safeExName}${setup.barPosition === n ? ' sel' : ''}" data-pos="${n}"
+        onclick="event.stopPropagation();setBarPosition('${ex.name.replace(/'/g,"\\'")}',${n})">${n}</button>`
+    ).join('');
+    const setupHtml = `
+      <div class="setup-section" onclick="event.stopPropagation()">
+        <div class="setup-label">⚙️ Setup</div>
+        <div class="seat-row">
+          <label class="seat-toggle-label">
+            <input type="checkbox" ${setup.seatRequired ? 'checked' : ''}
+              onchange="setSeatRequired('${ex.name.replace(/'/g,"\\'")}', this.checked)">
+            Seat required
+          </label>
+        </div>
+        <div class="bar-pos-row" id="bar-${safeExName}" style="display:${setup.seatRequired ? 'flex' : 'none'}">
+          <span class="bar-pos-label">Bar position:</span>
+          ${barPosHtml}
+        </div>
+      </div>`;
+
+    // Weight controls
+    const weightHtml = `
+      <div class="weight-row" onclick="event.stopPropagation()">
+        <span class="weight-label">🏋️ Weight</span>
+        <button class="wt-btn" onclick="event.stopPropagation();adjustWeight('${dayKey}','${ex.name.replace(/'/g,"\\'")}', -5)">−</button>
+        <input class="wt-input" id="winp-${safeKey}" type="number" min="0" step="5" value="${weight}"
+          onclick="event.stopPropagation()"
+          onchange="event.stopPropagation();setWeight('${dayKey}','${ex.name.replace(/'/g,"\\'")}',this.value)">
+        <span class="wt-unit">lbs</span>
+        <button class="wt-btn" onclick="event.stopPropagation();adjustWeight('${dayKey}','${ex.name.replace(/'/g,"\\'")}', 5)">+</button>
+      </div>`;
+
+    // Complete button
+    const completeHtml = `
+      <button class="complete-btn${done ? ' done' : ''}" id="cbtn-${safeKey}"
+        onclick="event.stopPropagation();toggleComplete('${dayKey}','${ex.name.replace(/'/g,"\\'")}')">
+        ${done ? '✓ Completed today!' : '○ Mark Complete'}
+      </button>`;
+
+    // Links
+    const linksHtml = `
+      ${ex.url ? (ex.url.includes('youtube.com') || ex.url.includes('youtube.com/shorts') ?
+        `<a class="exrx-link" href="${ex.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="background:rgba(255,0,0,.1);color:#ff6b6b;">▶ Watch on YouTube</a>` :
+        `<a class="exrx-link" href="${ex.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${linkIcon} View on ExRx.net</a>`) : ''}
+      ${ex.video ? `<a class="exrx-link" href="${ex.video}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="margin-left:.5rem;background:rgba(255,0,0,.1);color:#ff6b6b;">▶ Watch on YouTube</a>` : ''}
+      ${ex.note_url ? `<a class="exrx-link" href="${ex.note_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="margin-left:.5rem;background:rgba(116,185,255,.1);color:#74b9ff;">&#128279; Exercise Guide</a>` : ''}`;
+
     html += `
-      <div class="exercise-card" onclick="this.classList.toggle('open')">
-        <div class="exercise-top">
+      <div class="exercise-card" id="excard-${i}">
+        <div class="exercise-top" onclick="this.closest('.exercise-card').classList.toggle('open')">
           <div class="exercise-num">${i + 1}</div>
           <div class="exercise-info">
             <div class="exercise-name">${ex.name}</div>
@@ -816,15 +1197,22 @@ function renderContent(dayKey) {
               ${effortTagHtml}
             </div>
           </div>
+          <div class="card-right-meta">
+            ${weightBadgeHtml}
+            ${completeDotHtml}
+          </div>
           <div class="expand-arrow">&#9662;</div>
         </div>
         <div class="exercise-detail">
           <p>${ex.instructions}</p>
-          ${ex.url ? (ex.url.includes('youtube.com') ?
-            `<a class="exrx-link" href="${ex.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="background:rgba(255,0,0,.1);color:#ff6b6b;">▶ Watch on YouTube</a>` :
-            `<a class="exrx-link" href="${ex.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${linkIcon} View on ExRx.net</a>`) : ''}
-          ${ex.video ? `<a class="exrx-link" href="${ex.video}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="margin-left:.5rem;background:rgba(255,0,0,.1);color:#ff6b6b;">▶ Watch on YouTube</a>` : ''}
-          ${ex.note_url ? `<a class="exrx-link" href="${ex.note_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="margin-left:.5rem;background:rgba(116,185,255,.1);color:#74b9ff;">&#128279; Exercise Guide</a>` : ''}
+          <div class="detail-divider"></div>
+          ${setupHtml}
+          ${weightHtml}
+          ${completeHtml}
+          <div class="detail-divider"></div>
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+            ${linksHtml}
+          </div>
         </div>
       </div>
     `;
