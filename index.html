@@ -405,6 +405,17 @@
     font-weight: 700;
     white-space: nowrap;
   }
+  .seat-badge {
+    font-size: .7rem;
+    padding: .18rem .5rem;
+    border-radius: 5px;
+    background: rgba(108,92,231,.15);
+    color: #a29bfe;
+    font-weight: 700;
+    white-space: nowrap;
+    display: none;
+  }
+  .seat-badge.visible { display: inline-block; }
   .done-badge {
     font-size: .85rem;
     color: var(--green);
@@ -711,6 +722,15 @@ function getSetup(exName) {
   const d = loadData();
   return d.setup[exName] || { seatRequired: false, barPosition: null };
 }
+function _refreshSeatBadge(exName) {
+  const d = loadData();
+  const s = d.setup[exName] || {};
+  // update all days' badges for this exercise
+  document.querySelectorAll(`[id^="sbadge-"][id$="${toId(exName)}"]`).forEach(badge => {
+    badge.classList.toggle('visible', !!s.seatRequired);
+    badge.textContent = '🪑' + (s.barPosition ? ' ' + s.barPosition : '');
+  });
+}
 function setSeatRequired(exName, val) {
   const d = loadData();
   if (!d.setup[exName]) d.setup[exName] = { seatRequired: false, barPosition: null };
@@ -718,6 +738,7 @@ function setSeatRequired(exName, val) {
   saveData(d);
   const barRow = document.getElementById(`bar-${toId(exName)}`);
   if (barRow) barRow.style.display = val ? 'flex' : 'none';
+  _refreshSeatBadge(exName);
 }
 function setBarPosition(exName, pos) {
   const d = loadData();
@@ -727,6 +748,7 @@ function setBarPosition(exName, pos) {
   document.querySelectorAll(`.bpb-${toId(exName)}`).forEach(b => {
     b.classList.toggle('sel', parseInt(b.dataset.pos) === pos);
   });
+  _refreshSeatBadge(exName);
 }
 
 // ── Export / Import ──────────────────────────────────────────────────────────
@@ -866,11 +888,11 @@ const WORKOUTS = {
     note: '3 sets × 10–12 reps. Rest 60–90 sec between sets.',
     exercises: [
       { name:'Seated Dumbbell Shoulder Press', sets:3, reps:'10', instructions:'Sit on the bench with a dumbbell in each hand at shoulder height, palms facing forward. Press both dumbbells overhead until arms are fully extended, then lower slowly back to shoulder height. The dumbbells allow your arms to travel in a natural arc and let you adjust wrist angle through the movement — start slightly neutral and finish with palms forward. Primary deltoid mass builder.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/DBShoulderPress' },
-      { name:'Lateral Raises (Low Pulley)', sets:3, reps:'12', instructions:'Attach handles to low pulleys. Raise arms out to the sides to shoulder height. Hits the medial deltoid for width.', url:'https://exrx.net/WeightExercises/DeltoidLateral/CBLateralRaise' },
-      { name:'Front Raises (Alternating, Low Pulley)', sets:3, reps:'10 / arm', instructions:'Raise one arm forward to shoulder height. Controls the anterior deltoid used in forehand throws.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/CBFrontRaise' },
-      { name:'Reverse Flyes (High Pulley)', sets:3, reps:'12', instructions:'Face the tower, pull handles outward and back with slightly bent elbows. Posterior deltoid and rhomboid work.', url:'https://exrx.net/WeightExercises/DeltoidPosterior/CBStandingReverseFly' },
-      { name:'External Rotation (Low Pulley)', sets:3, reps:'15', instructions:'Stand sideways to the machine, elbow pinned at 90°. Rotate forearm outward. Essential for rotator cuff health and throwing deceleration.', url:'https://exrx.net/WeightExercises/Infraspinatus/CBStandingExternalRotation' },
-      { name:'Internal Rotation (Low Pulley)', sets:3, reps:'15', instructions:'Rotate forearm inward across body. Strengthens subscapularis for disc release power.', url:'https://exrx.net/WeightExercises/Subscapularis/CBStandingInternalRotation' },
+      { name:'Lateral Raises (Low Pulley)', sets:3, reps:'12', instructions:'Face away from machine. Attach handles to low pulleys. Raise arms out to the sides to shoulder height. Hits the medial deltoid for width.', url:'https://exrx.net/WeightExercises/DeltoidLateral/CBLateralRaise' },
+      { name:'Front Raises (Alternating, Low Pulley)', sets:3, reps:'10 / arm', instructions:'Face machine. Raise one arm forward to shoulder height. Controls the anterior deltoid used in forehand throws.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/CBFrontRaise' },
+      { name:'Seated Reverse Flyes (Mid Pulley)', sets:3, reps:'12', instructions:'Face machine. Pull handles outward and back with slightly bent elbows. Posterior deltoid and rhomboid work.', url:'https://exrx.net/WeightExercises/DeltoidPosterior/CBStandingReverseFly' },
+      { name:'External Rotation (Mid Pulley)', sets:3, reps:'15 / arm', instructions:'Stand sideways to the machine, elbow pinned at 90°. Rotate forearm outward. Essential for rotator cuff health and throwing deceleration.', url:'https://exrx.net/WeightExercises/Infraspinatus/CBStandingExternalRotation' },
+      { name:'Internal Rotation (Mid Pulley)', sets:3, reps:'15', instructions:'Rotate forearm inward across body. Strengthens subscapularis for disc release power.', url:'https://exrx.net/WeightExercises/Subscapularis/CBStandingInternalRotation' },
       { name:'Shrugs (Low Pulley)', sets:3, reps:'12', instructions:'Stand on the platform, handles at sides, shrug straight up. Builds upper traps for shoulder stability.', url:'https://exrx.net/WeightExercises/TrapeziusUpper/CBShrug' }
     ]
   },
@@ -880,12 +902,12 @@ const WORKOUTS = {
     note: '3 sets × 10–12 reps. Rest 60–90 sec between sets.',
     exercises: [
       { name:'Wide-Grip Lat Pulldowns', sets:3, reps:'10', instructions:'Use the lat bar, pull to upper chest. Wide grip emphasizes lat width and the pulling motion of a backhand throw.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBFrontPulldown' },
-      { name:'Close-Grip Lat Pulldowns', sets:3, reps:'10', instructions:'Narrow grip, palms facing each other. Shifts emphasis to lower lats and biceps.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBCloseGripPulldown' },
-      { name:'Straight-Arm Pullovers (Lying, Low Pulley)', sets:3, reps:'12', instructions:'Lie on the bench, arms extended overhead. Pull in an arc to your hips. Isolates the lats through a long range of motion.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBBentoverPullover', video:'https://www.youtube.com/watch?v=6SAL7xWOtpk' },
-      { name:'Romanian Deadlifts (Dumbbell)', sets:3, reps:'10', instructions:'Hold a dumbbell in each hand in front of your thighs, palms facing your body. Stand with feet hip-width apart and a soft bend in the knees. Hinge at the hips — push them back while keeping your back flat and chest up — lowering the dumbbells along your legs until you feel a deep hamstring stretch (typically mid-shin level). Drive your hips forward to return to standing and squeeze your glutes at the top. Keep the weights close to your body throughout.', url:'https://exrx.net/WeightExercises/ErectorSpinae/DBStiffLegDeadlift' },
+      { name:'Close-Grip Lat Pulldowns', sets:3, reps:'10', instructions:'Narrow grip, palms facing each other. Shifts emphasis to lower lats and biceps. See Narrow Pulldowns with Handgrips - Shoulder Extension (with elbow flexion) in Bowflex manual.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBCloseGripPulldown' },
+      { name:'Stiff Arm Pulldowns (High Pulley)', sets:3, reps:'12', instructions:'Lie on the bench, arms extended overhead. Pull in an arc to your hips. Isolates the lats through a long range of motion.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBBentoverPullover', video:'https://www.youtube.com/watch?v=6SAL7xWOtpk' },
+      { name:'Romanian Deadlifts (Dumbbell)', sets:3, reps:'10', instructions:'Hold a dumbbell in each hand in front of your thighs, palms facing your body. Stand with feet hip-width apart and a soft bend in the knees. Hinge at the hips — push them back while keeping your back flat and chest up — lowering the dumbbells along your legs until you feel a deep hamstring stretch (typically mid-shin level). Drive your hips forward to return to standing and squeeze your glutes at the top. Keep the weights close to your body throughout.', url:'https://exrx.net/WeightExercises/ErectorSpinae/DBStiffLegDeadlift', video:'https://www.youtube.com/watch?v=hQgFixeXdZo' },
       { name:'Cable Pull-Throughs (Low Pulley)', sets:3, reps:'12', instructions:'Stand facing away from the tower, straddle the cable. Hinge at the hips and let the handle swing back between your legs, then drive your hips forward to stand tall. Keep your back flat throughout. Excellent erector and glute work.', url:'https://exrx.net/WeightExercises/GluteusMaximus/CBPullThrough', video:'https://www.youtube.com/watch?v=VRDxdi2d-2c' },
       { name:'Supermans (Bodyweight)', sets:3, reps:'12', instructions:'Lie face down on the floor, arms extended overhead. Simultaneously lift your chest and legs off the ground and hold for 2–3 seconds, then lower. Directly targets the erectors and multifidus. No machine needed — use this as a lower back finisher.', url:'https://exrx.net/WeightExercises/ErectorSpinae/Superman', video:'https://www.youtube.com/watch?v=4Qm1OhAlOYM' },
-      { name:'Reverse Flyes (High Pulleys)', sets:3, reps:'12', instructions:'Repeat from Monday — rear delts and upper back benefit from this frequency.', url:'https://exrx.net/WeightExercises/DeltoidPosterior/CBStandingReverseFly' }
+      { name:'Seated Reverse Flyes (Mid Pulley)', sets:3, reps:'12', instructions:'Face machine. Pull handles outward and back with slightly bent elbows. Posterior deltoid and rhomboid work.', url:'https://exrx.net/WeightExercises/DeltoidPosterior/CBStandingReverseFly' }
     ]
   },
   wednesday: {
@@ -1133,8 +1155,9 @@ function renderContent(dayKey) {
     const safeKey  = toId(dayKey + '_' + ex.name);
     const safeExName = toId(ex.name);
 
-    // Weight badge & complete dot in collapsed header
+    // Weight badge, seat badge & complete dot in collapsed header
     const weightBadgeHtml = `<span class="weight-badge" id="wbadge-${safeKey}">${weight > 0 ? weight + ' lbs' : '—'}</span>`;
+    const seatBadgeHtml   = `<span class="seat-badge${setup.seatRequired ? ' visible' : ''}" id="sbadge-${safeKey}">🪑${setup.barPosition ? ' ' + setup.barPosition : ''}</span>`;
     const completeDotHtml = `<span class="${done ? 'done-badge' : 'pending-badge'}" id="cdot-${safeKey}">${done ? '✓' : '○'}</span>`;
 
     // Setup section
@@ -1198,6 +1221,7 @@ function renderContent(dayKey) {
             </div>
           </div>
           <div class="card-right-meta">
+            ${seatBadgeHtml}
             ${weightBadgeHtml}
             ${completeDotHtml}
           </div>
