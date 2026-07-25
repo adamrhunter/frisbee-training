@@ -99,7 +99,6 @@
     margin-top: 4px;
     width: fit-content;
   }
-  .phase-foundation { background: rgba(116,185,255,.12); color: var(--blue); border: 1px solid rgba(116,185,255,.25); }
   .phase-build      { background: rgba(253,203,110,.12); color: var(--orange); border: 1px solid rgba(253,203,110,.25); }
   .phase-push       { background: rgba(225,112,85,.12); color: var(--red); border: 1px solid rgba(225,112,85,.25); }
   .phase-deload     { background: rgba(0,184,148,.12); color: var(--green); border: 1px solid rgba(0,184,148,.25); }
@@ -176,8 +175,6 @@
   .effort-banner .effort-title { font-weight: 700; font-size: .9rem; margin-bottom: .15rem; }
   .effort-banner .effort-desc { font-size: .82rem; color: var(--text-dim); line-height: 1.5; }
 
-  .effort-foundation { background: rgba(116,185,255,.07); border-color: var(--blue); }
-  .effort-foundation .effort-title { color: var(--blue); }
   .effort-build { background: rgba(253,203,110,.07); border-color: var(--orange); }
   .effort-build .effort-title { color: var(--orange); }
   .effort-push { background: rgba(225,112,85,.07); border-color: var(--red); }
@@ -405,6 +402,66 @@
     font-weight: 700;
     white-space: nowrap;
   }
+  .weight-badge-push {
+    background: rgba(225,112,85,.12);
+    color: var(--red);
+  }
+  .weight-badge-deload {
+    background: rgba(0,184,148,.12);
+    color: var(--green);
+  }
+  .wt-deload-value {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  /* ── PHASE WEIGHTS TABLE ── */
+  .weights-section {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: .7rem .9rem;
+    margin-bottom: .75rem;
+  }
+  .weight-phase-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .4rem 0;
+    flex-wrap: wrap;
+  }
+  .weight-phase-row + .weight-phase-row { border-top: 1px solid var(--border); }
+  .wt-phase-label {
+    font-size: .8rem;
+    font-weight: 700;
+    min-width: 108px;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+  }
+  .wt-phase-label small { font-weight: 500; color: var(--text-dim); font-size: .68rem; }
+  .wt-phase-label.build-color { color: var(--orange); }
+  .wt-phase-label.push-color { color: var(--red); }
+  .wt-phase-label.deload-color { color: var(--green); }
+  .suggest-btn {
+    font-size: .7rem;
+    font-weight: 600;
+    padding: .3rem .55rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s;
+  }
+  .suggest-btn:hover { border-color: var(--red); color: var(--red); }
+  .deload-readout {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--green);
+  }
   .seat-badge {
     font-size: .7rem;
     padding: .18rem .5rem;
@@ -595,7 +652,7 @@
       <div class="week-heading">Training Week</div>
       <div class="week-display">
         <span class="week-num" id="weekNum">1</span>
-        <span class="week-of">of 10</span>
+        <span class="week-of">of 7</span>
       </div>
       <span class="week-phase-badge" id="phaseBadge"></span>
     </div>
@@ -646,18 +703,40 @@
 // Structure:
 // bowflex_data = {
 //   setup:     { "Exercise Name": { seatRequired: bool, barPosition: 1-6|null } }
-//   weights:   { "monday::Exercise Name": number }
+//   weights:   { "monday::Exercise Name::build": number, "monday::Exercise Name::push": number }
 //   completed: { "monday::Exercise Name::YYYY-MM-DD": true }
 // }
+// Deload weight is never stored directly — it's always auto-calculated as
+// DELOAD_AMOUNT% of the Push weight (or Build weight if no Push weight is set yet).
+// Storing Build + Push separately means you set each weight once and it stays
+// correct no matter which week you're viewing — no need to update it weekly.
 
 const DATA_KEY = 'bowflex_data';
+const DELOAD_AMOUNT = 70;   // deload weight = DELOAD_AMOUNT% of push (or build) weight
+const SUGGEST_PUSH_PCT = 20; // suggested Push weight = Build weight + this %
 
 // Safe ID for HTML attributes — strips everything non-alphanumeric to underscores
 function toId(str) { return str.replace(/[^a-zA-Z0-9]/g, '_'); }
 
 function loadData() {
-  try { return JSON.parse(localStorage.getItem(DATA_KEY)) || { setup:{}, weights:{}, completed:{} }; }
-  catch(e) { return { setup:{}, weights:{}, completed:{} }; }
+  let d;
+  try { d = JSON.parse(localStorage.getItem(DATA_KEY)) || { setup:{}, weights:{}, completed:{} }; }
+  catch(e) { d = { setup:{}, weights:{}, completed:{} }; }
+  if (!d.setup) d.setup = {};
+  if (!d.weights) d.weights = {};
+  if (!d.completed) d.completed = {};
+  // One-time migration: old single-weight keys ("day::exName") become the Build weight
+  let migrated = false;
+  Object.keys(d.weights).forEach(k => {
+    const parts = k.split('::');
+    if (parts.length === 2) {
+      d.weights[`${parts[0]}::${parts[1]}::build`] = d.weights[k];
+      delete d.weights[k];
+      migrated = true;
+    }
+  });
+  if (migrated) saveData(d);
+  return d;
 }
 
 function saveData(d) {
@@ -668,25 +747,54 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// Weight
-function getWeight(dayKey, exName) {
+// Weight — stored per phase ('build' | 'push'); 'deload' is always derived
+function getWeight(dayKey, exName, phase) {
   const d = loadData();
-  return d.weights[`${dayKey}::${exName}`] ?? 0;
+  return d.weights[`${dayKey}::${exName}::${phase}`] ?? 0;
 }
-function setWeight(dayKey, exName, val) {
+function getDeloadWeight(dayKey, exName) {
+  const push = getWeight(dayKey, exName, 'push');
+  const build = getWeight(dayKey, exName, 'build');
+  const base = push > 0 ? push : build;
+  return Math.round(base * DELOAD_AMOUNT / 100);
+}
+function setWeight(dayKey, exName, phase, val) {
   const d = loadData();
   const v = Math.max(0, parseFloat(val) || 0);
-  d.weights[`${dayKey}::${exName}`] = v;
+  d.weights[`${dayKey}::${exName}::${phase}`] = v;
   saveData(d);
-  const badge = document.getElementById(`wbadge-${toId(dayKey+'_'+exName)}`);
-  if (badge) badge.textContent = v > 0 ? v + ' lbs' : '—';
+  _refreshWeightUI(dayKey, exName);
 }
-function adjustWeight(dayKey, exName, delta) {
-  const cur = getWeight(dayKey, exName);
+function adjustWeight(dayKey, exName, phase, delta) {
+  const cur = getWeight(dayKey, exName, phase);
   const next = Math.max(0, Math.round((cur + delta) * 10) / 10);
-  setWeight(dayKey, exName, next);
-  const inp = document.getElementById(`winp-${toId(dayKey+'_'+exName)}`);
+  setWeight(dayKey, exName, phase, next);
+  const inp = document.getElementById(`winp-${phase}-${toId(dayKey+'_'+exName)}`);
   if (inp) inp.value = next;
+}
+function suggestPushWeight(dayKey, exName) {
+  const build = getWeight(dayKey, exName, 'build');
+  if (build <= 0) { alert('Set a Build weight first.'); return; }
+  const suggested = Math.round(build * (1 + SUGGEST_PUSH_PCT / 100) / 5) * 5;
+  setWeight(dayKey, exName, 'push', suggested);
+  const inp = document.getElementById(`winp-push-${toId(dayKey+'_'+exName)}`);
+  if (inp) inp.value = suggested;
+}
+function _refreshWeightUI(dayKey, exName) {
+  const key = toId(dayKey+'_'+exName);
+  const phase = getPhase(currentWeek);
+  const buildW = getWeight(dayKey, exName, 'build');
+  const pushW  = getWeight(dayKey, exName, 'push');
+  const deloadW = getDeloadWeight(dayKey, exName);
+  const activeW = phase === 'build' ? buildW : (phase === 'push' ? pushW : deloadW);
+
+  const badge = document.getElementById(`wbadge-${key}`);
+  if (badge) {
+    badge.textContent = activeW > 0 ? activeW + ' lbs' : '—';
+    badge.className = 'weight-badge' + (phase === 'push' ? ' weight-badge-push' : phase === 'deload' ? ' weight-badge-deload' : '');
+  }
+  const deloadReadout = document.getElementById(`wt-deload-readout-${key}`);
+  if (deloadReadout) deloadReadout.textContent = deloadW > 0 ? `${deloadW} lbs (auto, ${DELOAD_AMOUNT}%)` : '— (set Build or Push first)';
 }
 
 // Completion
@@ -804,76 +912,59 @@ const DAYS = [
 
 const PHASES = [
   null, // 1-indexed
-  { id:'foundation', label:'Foundation', weeks:'1–3', icon:'🏗️',
-    badge:'Foundation',
-    title:'Foundation Phase (Weeks 1–3): Learn & Connect',
-    desc:'Focus on movement quality, not load. Use a resistance level where all reps feel controlled. Build the mind-muscle connection — especially on rotator cuff and rotational exercises.' },
-  { id:'foundation', label:'Foundation', weeks:'1–3', icon:'🏗️',
-    badge:'Foundation',
-    title:'Foundation Phase (Weeks 1–3): Learn & Connect',
-    desc:'Focus on movement quality, not load. Use a resistance level where all reps feel controlled. Build the mind-muscle connection — especially on rotator cuff and rotational exercises.' },
-  { id:'foundation', label:'Foundation', weeks:'1–3', icon:'🏗️',
-    badge:'Foundation',
-    title:'Foundation Phase (Weeks 1–3): Learn & Connect',
-    desc:'Focus on movement quality, not load. Use a resistance level where all reps feel controlled. Build the mind-muscle connection — especially on rotator cuff and rotational exercises.' },
-  { id:'build', label:'Build', weeks:'4–6', icon:'📈',
+  { id:'build', label:'Build', weeks:'1–3', icon:'📈',
     badge:'Build',
-    title:'Build Phase (Weeks 4–6): Progressive Overload',
+    title:'Build Phase (Weeks 1–3): Progressive Overload',
     desc:'Begin increasing resistance. When you can complete 12 reps with clean form, move up one resistance level. Your compound lifts — presses, rows, pulldowns — should be climbing each week.' },
-  { id:'build', label:'Build', weeks:'4–6', icon:'📈',
+  { id:'build', label:'Build', weeks:'1–3', icon:'📈',
     badge:'Build',
-    title:'Build Phase (Weeks 4–6): Progressive Overload',
+    title:'Build Phase (Weeks 1–3): Progressive Overload',
     desc:'Begin increasing resistance. When you can complete 12 reps with clean form, move up one resistance level. Your compound lifts — presses, rows, pulldowns — should be climbing each week.' },
-  { id:'build', label:'Build', weeks:'4–6', icon:'📈',
+  { id:'build', label:'Build', weeks:'1–3', icon:'📈',
     badge:'Build',
-    title:'Build Phase (Weeks 4–6): Progressive Overload',
+    title:'Build Phase (Weeks 1–3): Progressive Overload',
     desc:'Begin increasing resistance. When you can complete 12 reps with clean form, move up one resistance level. Your compound lifts — presses, rows, pulldowns — should be climbing each week.' },
-  { id:'push', label:'Push', weeks:'7–9', icon:'🔥',
+  { id:'push', label:'Push', weeks:'4–6', icon:'🔥',
     badge:'Push',
-    title:'Push Phase (Weeks 7–9): High Intensity',
+    title:'Push Phase (Weeks 4–6): High Intensity',
     desc:'Friday\'s heavy compounds drop to 6–8 reps with max resistance. Thursday stays at moderate resistance but prioritize speed and control — training power transfer, not maximal load. Other days: continue adding resistance.' },
-  { id:'push', label:'Push', weeks:'7–9', icon:'🔥',
+  { id:'push', label:'Push', weeks:'4–6', icon:'🔥',
     badge:'Push',
-    title:'Push Phase (Weeks 7–9): High Intensity',
+    title:'Push Phase (Weeks 4–6): High Intensity',
     desc:'Friday\'s heavy compounds drop to 6–8 reps with max resistance. Thursday stays at moderate resistance but prioritize speed and control — training power transfer, not maximal load. Other days: continue adding resistance.' },
-  { id:'push', label:'Push', weeks:'7–9', icon:'🔥',
+  { id:'push', label:'Push', weeks:'4–6', icon:'🔥',
     badge:'Push',
-    title:'Push Phase (Weeks 7–9): High Intensity',
+    title:'Push Phase (Weeks 4–6): High Intensity',
     desc:'Friday\'s heavy compounds drop to 6–8 reps with max resistance. Thursday stays at moderate resistance but prioritize speed and control — training power transfer, not maximal load. Other days: continue adding resistance.' },
-  { id:'deload', label:'Deload', weeks:'10', icon:'🌿',
+  { id:'deload', label:'Deload', weeks:'7', icon:'🌿',
     badge:'Deload',
-    title:'Deload Week (Week 10): Active Recovery',
+    title:'Deload Week (Week 7): Active Recovery',
     desc:'Drop all resistance by ~30% and keep reps in the moderate range (10–12). Let your joints, tendons, and connective tissue recover. After this week, restart the cycle at a higher baseline resistance.' },
 ];
 
 // Per-day effort tags by phase
 const EFFORT = {
   monday: {
-    foundation: { tag: 'Moderate', cls: 'tag-moderate', note: 'Learn the movements. Controlled form on all rotator cuff work.' },
     build:      { tag: 'Moderate–Heavy', cls: 'tag-moderate', note: 'Increase resistance when 12 reps feel easy.' },
     push:       { tag: 'Heavy', cls: 'tag-heavy', note: 'Push resistance on press and raises. Rotator cuff stays moderate.' },
     deload:     { tag: 'Light (−30%)', cls: 'tag-light', note: 'Drop resistance ~30% across all exercises.' }
   },
   tuesday: {
-    foundation: { tag: 'Moderate', cls: 'tag-moderate', note: 'Focus on full range of motion. Slow eccentrics on deadlifts.' },
     build:      { tag: 'Moderate–Heavy', cls: 'tag-moderate', note: 'Add resistance on pulldowns and rows each week.' },
     push:       { tag: 'Heavy', cls: 'tag-heavy', note: 'Maximize resistance on pulldowns and rows with clean form.' },
     deload:     { tag: 'Light (−30%)', cls: 'tag-light', note: 'Light weight, full range of motion. Flush the muscles.' }
   },
   wednesday: {
-    foundation: { tag: 'Moderate', cls: 'tag-moderate', note: 'Strict form on curls and extensions. No swinging.' },
     build:      { tag: 'Moderate–Heavy', cls: 'tag-moderate', note: 'Increase resistance on curls and pushdowns when 12 reps feel easy.' },
     push:       { tag: 'Heavy', cls: 'tag-heavy', note: 'Push the resistance on main lifts. Wrist curls stay moderate.' },
     deload:     { tag: 'Light (−30%)', cls: 'tag-light', note: 'Light and slow. Protect the wrists and elbows.' }
   },
   thursday: {
-    foundation: { tag: 'Moderate', cls: 'tag-moderate', note: 'Focus on rotation mechanics and hip drive. Not a heavy day.' },
     build:      { tag: 'Moderate', cls: 'tag-moderate', note: 'Moderate resistance, emphasize smooth rotational movement.' },
     push:       { tag: 'Speed & Control', cls: 'tag-speed', note: 'Moderate weight but move it with intent and speed. Power transfer, not max load.' },
     deload:     { tag: 'Light (−30%)', cls: 'tag-light', note: 'Go through the motions. Focus on technique.' }
   },
   friday: {
-    foundation: { tag: 'Moderate', cls: 'tag-moderate', note: '3×10 on everything. Same as Mon/Tue but ties it together.' },
     build:      { tag: 'Heavy', cls: 'tag-heavy', note: '4×8 on compounds. Push the resistance — this is your strength day.' },
     push:       { tag: 'Max Effort', cls: 'tag-heavy', note: '4×6–8 on compounds with maximum resistance. Rest 90–120 sec between sets.' },
     deload:     { tag: 'Light (−30%)', cls: 'tag-light', note: 'Back off to 3×10 at reduced weight. Just move.' }
@@ -890,7 +981,7 @@ const WORKOUTS = {
       { name:'Seated Dumbbell Shoulder Press', sets:3, reps:'10', instructions:'Sit on the bench with a dumbbell in each hand at shoulder height, palms facing forward. Press both dumbbells overhead until arms are fully extended, then lower slowly back to shoulder height. The dumbbells allow your arms to travel in a natural arc and let you adjust wrist angle through the movement — start slightly neutral and finish with palms forward. Primary deltoid mass builder.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/DBShoulderPress' },
       { name:'Lateral Raises (Low Pulley)', sets:3, reps:'12', instructions:'Face away from machine. Attach handles to low pulleys. Raise arms out to the sides to shoulder height. Hits the medial deltoid for width.', url:'https://exrx.net/WeightExercises/DeltoidLateral/CBLateralRaise' },
       { name:'Front Raises (Alternating, Low Pulley)', sets:3, reps:'10 / arm', instructions:'Face machine. Raise one arm forward to shoulder height. Controls the anterior deltoid used in forehand throws.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/CBFrontRaise' },
-      { name:'Seated Reverse Flyes (Mid Pulley)', sets:3, reps:'12', instructions:'Face machine. Pull handles outward and back with slightly bent elbows. Posterior deltoid and rhomboid work.', url:'https://exrx.net/WeightExercises/DeltoidPosterior/CBStandingReverseFly' },
+      { name:'Crossover High Rear Delt Rows', sets:3, reps:'12', instructions:'Cross the cables — right hand grabs the left pulley, left hand grabs the right. From this high crossed position, row back by driving your elbows behind you and squeezing your shoulder blades together. The crossed cable angle aggressively targets the rear delt throughout the full range. Also works the rhomboids and mid-traps through scapular retraction. See Crossover High Rear Delt Rows in the Bowflex manual.', url:'https://exrx.net/WeightExercises/DeltoidPosterior/CBRearDeltFly' },
       { name:'External Rotation (Mid Pulley)', sets:3, reps:'15 / arm', instructions:'Stand sideways to the machine, elbow pinned at 90°. Rotate forearm outward. Essential for rotator cuff health and throwing deceleration.', url:'https://exrx.net/WeightExercises/Infraspinatus/CBStandingExternalRotation' },
       { name:'Internal Rotation (Mid Pulley)', sets:3, reps:'15', instructions:'Rotate forearm inward across body. Strengthens subscapularis for disc release power.', url:'https://exrx.net/WeightExercises/Subscapularis/CBStandingInternalRotation' },
       { name:'Shrugs (Low Pulley)', sets:3, reps:'12', instructions:'Stand on the platform, handles at sides, shrug straight up. Builds upper traps for shoulder stability.', url:'https://exrx.net/WeightExercises/TrapeziusUpper/CBShrug' }
@@ -907,7 +998,7 @@ const WORKOUTS = {
       { name:'Romanian Deadlifts (Dumbbell)', sets:3, reps:'10', instructions:'Hold a dumbbell in each hand in front of your thighs, palms facing your body. Stand with feet hip-width apart and a soft bend in the knees. Hinge at the hips — push them back while keeping your back flat and chest up — lowering the dumbbells along your legs until you feel a deep hamstring stretch (typically mid-shin level). Drive your hips forward to return to standing and squeeze your glutes at the top. Keep the weights close to your body throughout.', url:'https://exrx.net/WeightExercises/ErectorSpinae/DBStiffLegDeadlift', video:'https://www.youtube.com/watch?v=hQgFixeXdZo' },
       { name:'Cable Pull-Throughs (Low Pulley)', sets:3, reps:'12', instructions:'Stand facing away from the tower, straddle the cable. Hinge at the hips and let the handle swing back between your legs, then drive your hips forward to stand tall. Keep your back flat throughout. Excellent erector and glute work.', url:'https://exrx.net/WeightExercises/GluteusMaximus/CBPullThrough', video:'https://www.youtube.com/watch?v=VRDxdi2d-2c' },
       { name:'Supermans (Bodyweight)', sets:3, reps:'12', instructions:'Lie face down on the floor, arms extended overhead. Simultaneously lift your chest and legs off the ground and hold for 2–3 seconds, then lower. Directly targets the erectors and multifidus. No machine needed — use this as a lower back finisher.', url:'https://exrx.net/WeightExercises/ErectorSpinae/Superman', video:'https://www.youtube.com/watch?v=4Qm1OhAlOYM' },
-      { name:'Seated Reverse Flyes (Mid Pulley)', sets:3, reps:'12', instructions:'Face machine. Pull handles outward and back with slightly bent elbows. Posterior deltoid and rhomboid work.', url:'https://exrx.net/WeightExercises/DeltoidPosterior/CBStandingReverseFly' }
+      { name:'Crossover High Rear Delt Rows', sets:3, reps:'12', instructions:'Cross the cables — right hand grabs the left pulley, left hand grabs the right. From this high crossed position, row back by driving your elbows behind you and squeezing your shoulder blades together. The crossed cable angle aggressively targets the rear delt throughout the full range. Also works the rhomboids and mid-traps through scapular retraction. See Crossover High Rear Delt Rows in the Bowflex manual.', url:'https://exrx.net/WeightExercises/DeltoidPosterior/CBRearDeltFly' }
     ]
   },
   wednesday: {
@@ -931,9 +1022,9 @@ const WORKOUTS = {
     exercises: [
       { name:'Standing Trunk Rotation (Single Pulley)', sets:3, reps:'12 / side', instructions:'Stand sideways to the tower, pull the handle across your body in a rotating motion. Mimics the backhand throw path. Drive from the hips. See Trunk Rotation in bowflex manual.', url:'https://www.youtube.com/shorts/Lb7syA3GPHI' },
       { name:'Single-Arm Cable Rows (Low Pulley)', sets:3, reps:'10 / arm', instructions:'Pull with one arm while resisting rotation through your core. Trains the asymmetric pulling pattern of throwing. Grasp stirrup on low pulley with overhand grip. Stand with side of arm with stirrup away from pulley machine, arm against front of body. Place other hand on ballet bar or side of pulley column for support.', url:'https://exrx.net/WeightExercises/DeltoidLateral/CBOneArmUprightRow' },
-      { name:'Cable Chop (High to Low)', sets:3, reps:'10 / side', instructions:'Stand sideways to the lat tower, grab the high pulley handle with both hands. Pull diagonally down and across your body, rotating through your hips and core. Control the return — the eccentric loads the obliques hard. Trains the same rotational muscles as the throwing motion.', url:'https://www.youtube.com/watch?v=Smmbrb5Ml2E' },
+      { name:'Cable Chop (High to Low)', sets:3, reps:'10 / side', instructions:'Stand sideways to the lat tower, grab the high pulley handle with both hands. Keep arms straight. Engage abs. Pull diagonally down and across your body, rotating through your hips and core. Control the return — the eccentric loads the obliques hard. Trains the same rotational muscles as the throwing motion. Pull across the machine to avoid it being pulled away.', url:'https://www.youtube.com/watch?v=Smmbrb5Ml2E' },
       { name:'Single-Arm Dumbbell Shoulder Press', sets:3, reps:'10 / arm', instructions:'Use a dumbbell instead of the cable machine for this one. Stand or sit, press one arm overhead at a time. Start with a neutral grip (thumb forward) and let the wrist naturally rotate to finish with palm facing forward at the top — this mirrors the throwing motion. Brace your core hard against the rotational pull of the unloaded side. The free weight challenges balance in all directions and allows natural wrist rotation that cables can\'t replicate.', url:'https://exrx.net/WeightExercises/DeltoidAnterior/DBOneArmShoulderPress' },
-      { name:'Internal Rotation at 90° Abduction', sets:3, reps:'12 / arm', instructions:'Arm out to the side at shoulder height, elbow bent 90°. Rotate hand forward and down — this is the exact motion of disc release.', url:'https://www.youtube.com/watch?v=blY9W2WccBY' },
+      { name:'Internal Rotation at 90° Abduction', sets:3, reps:'12 / arm', instructions:'High Pulleys.  Arm out to the side at shoulder height, elbow bent 90°. Rotate hand forward and down — this is the exact motion of disc release.', url:'https://www.youtube.com/watch?v=blY9W2WccBY' },
       { name:'Single-Arm Lat Pulldown', sets:3, reps:'10 / arm', instructions:'Unilateral lat work to address imbalances between throwing and non-throwing sides.', url:'https://exrx.net/WeightExercises/LatissimusDorsi/CBOneArmPulldown', note_url:'https://www.hevyapp.com/exercises/how-to-single-arm-lat-pulldown/' },
       { name:'Pallof Press (Mid Pulley)', sets:3, reps:'10 / side', instructions:'Face perpendicular to the cable. Press straight out and hold 2 seconds — resist the rotation. Builds anti-rotation stability to protect your spine during throws. Switch sides immediately with less than 30 seconds rest between sides.', url:'https://www.youtube.com/shorts/qOnAC5hz0Vg' }
     ]
@@ -956,16 +1047,15 @@ const WORKOUTS = {
 const linkIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5zm7.25-.75a.75.75 0 01.75-.75h3.5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V6.31l-5.47 5.47a.75.75 0 01-1.06-1.06l5.47-5.47H12.25a.75.75 0 01-.75-.75z" clip-rule="evenodd"/></svg>`;
 
 // ── State ────────────────────────────────────────────────────────────────────
-let currentWeek = parseInt(localStorage.getItem('bowflex_week') || '1');
+let currentWeek = Math.min(parseInt(localStorage.getItem('bowflex_week') || '1'), 7);
 let activeDay = null;
 let pickerSelected = currentWeek;
 
 function saveWeek() { localStorage.setItem('bowflex_week', currentWeek); }
 
 function getPhase(w) {
-  if (w <= 3) return 'foundation';
-  if (w <= 6) return 'build';
-  if (w <= 9) return 'push';
+  if (w <= 3) return 'build';
+  if (w <= 6) return 'push';
   return 'deload';
 }
 
@@ -980,7 +1070,7 @@ function renderWeekBar() {
 
   const prog = document.getElementById('weekProgress');
   prog.innerHTML = '';
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 7; i++) {
     const d = document.createElement('div');
     d.className = 'week-dot';
     if (i < currentWeek) d.classList.add('done');
@@ -991,14 +1081,14 @@ function renderWeekBar() {
   }
 
   document.getElementById('prevWeek').disabled = currentWeek <= 1;
-  document.getElementById('nextWeek').disabled = currentWeek >= 10;
+  document.getElementById('nextWeek').disabled = currentWeek >= 7;
 }
 
 document.getElementById('prevWeek').addEventListener('click', () => {
   if (currentWeek > 1) { currentWeek--; saveWeek(); renderWeekBar(); renderContent(DAYS[activeDay].key); }
 });
 document.getElementById('nextWeek').addEventListener('click', () => {
-  if (currentWeek < 10) { currentWeek++; saveWeek(); renderWeekBar(); renderContent(DAYS[activeDay].key); }
+  if (currentWeek < 7) { currentWeek++; saveWeek(); renderWeekBar(); renderContent(DAYS[activeDay].key); }
 });
 
 // ── Week Picker Modal ────────────────────────────────────────────────────────
@@ -1008,8 +1098,8 @@ function openPicker() {
   pickerSelected = currentWeek;
   const grid = document.getElementById('weekGrid');
   grid.innerHTML = '';
-  const phaseNames = ['','Foundation','Foundation','Foundation','Build','Build','Build','Push','Push','Push','Deload'];
-  for (let i = 1; i <= 10; i++) {
+  const phaseNames = ['','Build','Build','Build','Push','Push','Push','Deload'];
+  for (let i = 1; i <= 7; i++) {
     const btn = document.createElement('button');
     btn.className = 'week-pick-btn' + (i === pickerSelected ? ' selected' : '');
     btn.innerHTML = `W${i}<span class="pick-phase">${phaseNames[i]}</span>`;
@@ -1105,8 +1195,7 @@ function renderContent(dayKey) {
   // Workout note (Friday is phase-aware)
   let noteText = w.note || '3 sets × 10–12 reps. Rest 60–90 sec between sets.';
   if (dayKey === 'friday') {
-    if (phase === 'foundation') noteText = '3 sets × 10 reps. Rest 60–90 sec. Same tempo as Mon/Tue.';
-    else if (phase === 'build') noteText = '4 sets × 8 reps on compounds, 3 × 10–12 on accessories. Rest 90 sec.';
+    if (phase === 'build') noteText = '4 sets × 8 reps on compounds, 3 × 10–12 on accessories. Rest 90 sec.';
     else if (phase === 'push') noteText = '4 sets × 6–8 reps on compounds (max effort). 3 × 10 on accessories. Rest 90–120 sec.';
     else noteText = '3 sets × 10 reps at reduced resistance (−30%). Rest 60 sec.';
   }
@@ -1144,19 +1233,20 @@ function renderContent(dayKey) {
     }
 
     let setsDisplay = ex.sets;
-    if (dayKey === 'friday' && ex.heavy) {
-      setsDisplay = phase === 'foundation' ? 3 : 4;
-    }
 
     // Persistent data for this exercise
-    const weight   = getWeight(dayKey, ex.name);
+    const buildWeight  = getWeight(dayKey, ex.name, 'build');
+    const pushWeight   = getWeight(dayKey, ex.name, 'push');
+    const deloadWeight = getDeloadWeight(dayKey, ex.name);
+    const activeWeight = phase === 'build' ? buildWeight : (phase === 'push' ? pushWeight : deloadWeight);
     const done     = isCompleted(dayKey, ex.name);
     const setup    = getSetup(ex.name);
     const safeKey  = toId(dayKey + '_' + ex.name);
     const safeExName = toId(ex.name);
 
-    // Weight badge, seat badge & complete dot in collapsed header
-    const weightBadgeHtml = `<span class="weight-badge" id="wbadge-${safeKey}">${weight > 0 ? weight + ' lbs' : '—'}</span>`;
+    // Weight badge (shows the weight relevant to the currently viewed week), seat badge & complete dot
+    const badgePhaseCls = phase === 'push' ? ' weight-badge-push' : phase === 'deload' ? ' weight-badge-deload' : '';
+    const weightBadgeHtml = `<span class="weight-badge${badgePhaseCls}" id="wbadge-${safeKey}">${activeWeight > 0 ? activeWeight + ' lbs' : '—'}</span>`;
     const seatBadgeHtml   = `<span class="seat-badge${setup.seatRequired ? ' visible' : ''}" id="sbadge-${safeKey}">🪑${setup.barPosition ? ' ' + setup.barPosition : ''}</span>`;
     const completeDotHtml = `<span class="${done ? 'done-badge' : 'pending-badge'}" id="cdot-${safeKey}">${done ? '✓' : '○'}</span>`;
 
@@ -1181,16 +1271,35 @@ function renderContent(dayKey) {
         </div>
       </div>`;
 
-    // Weight controls
+    // Weight controls — Build & Push are set once and stay correct across all weeks;
+    // Deload is always auto-derived so there's nothing to maintain for it.
+    const exNameEsc = ex.name.replace(/'/g,"\\'");
     const weightHtml = `
-      <div class="weight-row" onclick="event.stopPropagation()">
-        <span class="weight-label">🏋️ Weight</span>
-        <button class="wt-btn" onclick="event.stopPropagation();adjustWeight('${dayKey}','${ex.name.replace(/'/g,"\\'")}', -5)">−</button>
-        <input class="wt-input" id="winp-${safeKey}" type="number" min="0" step="5" value="${weight}"
-          onclick="event.stopPropagation()"
-          onchange="event.stopPropagation();setWeight('${dayKey}','${ex.name.replace(/'/g,"\\'")}',this.value)">
-        <span class="wt-unit">lbs</span>
-        <button class="wt-btn" onclick="event.stopPropagation();adjustWeight('${dayKey}','${ex.name.replace(/'/g,"\\'")}', 5)">+</button>
+      <div class="weights-section" onclick="event.stopPropagation()">
+        <div class="setup-label">🏋️ Working Weights (set once per phase)</div>
+        <div class="weight-phase-row">
+          <span class="wt-phase-label build-color">Build<small>Weeks 1–3</small></span>
+          <button class="wt-btn" onclick="event.stopPropagation();adjustWeight('${dayKey}','${exNameEsc}','build', -5)">−</button>
+          <input class="wt-input" id="winp-build-${safeKey}" type="number" min="0" step="5" value="${buildWeight}"
+            onclick="event.stopPropagation()"
+            onchange="event.stopPropagation();setWeight('${dayKey}','${exNameEsc}','build',this.value)">
+          <span class="wt-unit">lbs</span>
+          <button class="wt-btn" onclick="event.stopPropagation();adjustWeight('${dayKey}','${exNameEsc}','build', 5)">+</button>
+        </div>
+        <div class="weight-phase-row">
+          <span class="wt-phase-label push-color">Push<small>Weeks 4–6</small></span>
+          <button class="wt-btn" onclick="event.stopPropagation();adjustWeight('${dayKey}','${exNameEsc}','push', -5)">−</button>
+          <input class="wt-input" id="winp-push-${safeKey}" type="number" min="0" step="5" value="${pushWeight}"
+            onclick="event.stopPropagation()"
+            onchange="event.stopPropagation();setWeight('${dayKey}','${exNameEsc}','push',this.value)">
+          <span class="wt-unit">lbs</span>
+          <button class="wt-btn" onclick="event.stopPropagation();adjustWeight('${dayKey}','${exNameEsc}','push', 5)">+</button>
+          <button class="suggest-btn" onclick="event.stopPropagation();suggestPushWeight('${dayKey}','${exNameEsc}')">Suggest +${SUGGEST_PUSH_PCT}%</button>
+        </div>
+        <div class="weight-phase-row">
+          <span class="wt-phase-label deload-color">Deload<small>Week 7 · auto</small></span>
+          <span class="deload-readout" id="wt-deload-readout-${safeKey}">${deloadWeight > 0 ? deloadWeight + ' lbs (auto, ' + DELOAD_AMOUNT + '%)' : '— (set Build or Push first)'}</span>
+        </div>
       </div>`;
 
     // Complete button
@@ -1246,6 +1355,13 @@ function renderContent(dayKey) {
     <div class="info-section">
       <h3>Warm-Up Reminder</h3>
       <p>5 minutes before every session: light arm circles, band pull-aparts, and 10–15 bodyweight squats. Never go into shoulder or rotational work cold.</p>
+    </div>
+    <div class="info-section">
+      <h3>📊 How Much to Increase Each Phase</h3>
+      <p><strong>When to add weight:</strong> use the "two-for-two" rule — once you complete two extra reps beyond your target on the last set, on two consecutive sessions, bump the weight. This is more reliable than a fixed schedule since it adapts to your actual recovery.</p>
+      <p><strong>Build (Weeks 1–3):</strong> roughly 2.5–5% per week on compound lifts (presses, pulldowns, rows) once 12 reps feel clean. Isolation and rotator cuff work (raises, rotations, wrist curls) should climb far more conservatively — small jumps only, if any.</p>
+      <p><strong>Push (Weeks 4–6):</strong> reps drop to 6–8, so load typically jumps another 15–25% above your Build working weight on compound lifts — the "Suggest +20%" button gives you a starting point to adjust from. Isolation and rotator cuff exercises should increase much less, if at all.</p>
+      <p><strong>Deload (Week 7):</strong> automatically calculated at 70% of your Push weight (or Build weight if Push isn't set) — nothing to adjust manually.</p>
     </div>
   `;
 
